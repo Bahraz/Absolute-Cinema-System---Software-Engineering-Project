@@ -1,10 +1,9 @@
 
 import express from 'express';
+import { userController } from '@controllers/userController';
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.json({ message: 'GET all users - placeholder' });
-});
+router.get('/', (req, res) => userController.showUsers(req, res));
 
 router.post('/', (req, res) => {
   res.json({ message: 'POST user - placeholder' });
