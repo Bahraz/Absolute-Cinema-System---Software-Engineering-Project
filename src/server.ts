@@ -6,7 +6,6 @@ import { connectDB } from '@config/database';
 
 const PORT = process.env.PORT || 3000;
 
-// najpierw łączysz z bazą
 connectDB()
   .then(() => {
     app.listen(PORT, () => console.log(`🚀 Serwer działa na porcie ${PORT}`));

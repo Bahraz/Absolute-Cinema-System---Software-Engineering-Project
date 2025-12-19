@@ -7,7 +7,6 @@ export interface IUser extends Document {
   surname?: string;
   email: string;
   password: string;
-  isAdmin: boolean;
   apiToken: string;
   comparePassword(password: string): boolean;
 }
@@ -18,7 +17,6 @@ const UserSchema: Schema<IUser> = new Schema(
     surname: { type: String },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6 },
-    isAdmin: { type: Boolean, default: false },
     apiToken: { type: String }
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }

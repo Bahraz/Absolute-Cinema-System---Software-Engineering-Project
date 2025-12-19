@@ -1,0 +1,34 @@
+<a href="/">Strona Główna</a>
+
+<h2>Dodaj aktora</h2>
+<form method="POST" action="/api/actors/add">
+  <input name="name" type="text" placeholder="Imie aktora..." />
+  <input name="surname" type="text" placeholder="Nazwisko aktora..." />
+  <button type="submit">Wyślij</button>
+</form>
+
+<h2>Edytuj aktora</h2>
+<form method="POST" action="/api/actors/update">
+  <select name="id">
+    <% actors.forEach(actor => { %>
+    <option value="<%= actor._id %>">
+      <%= actor.name %> <%= actor.surname %>
+    </option>
+    <% }) %>
+  </select>
+  <input name="name" type="text" placeholder="Imię aktora..." />
+  <input name="surname" type="text" placeholder="Nazwisko aktora..." />
+  <button type="submit">Zaktualizuj</button>
+</form>
+
+<h2>Usuń aktora</h2>
+<form method="POST" action="/api/actors/delete">
+  <select name="id">
+    <% actors.forEach(actor => { %>
+    <option value="<%= actor._id %>">
+      <%= actor.name %> <%= actor.surname %>
+    </option>
+    <% }) %>
+  </select>
+  <button type="submit">Usuń</button>
+</form>
