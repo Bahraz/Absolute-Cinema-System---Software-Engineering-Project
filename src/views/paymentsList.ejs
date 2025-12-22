@@ -1,0 +1,17 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h2>Lista Płatności</h2>
+
+<ul>
+  <% payments.forEach(p => { %>
+  <li>
+    <strong>ID:</strong> <%= p.id %><br />
+    <strong>Provider:</strong> <%= p.provider %><br />
+    <strong>Status:</strong> <%= p.status %>
+  </li>
+  <br />
+  <% }) %>
+</ul>
+
+<a href="/payment">Powrót</a>

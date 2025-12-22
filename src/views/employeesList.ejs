@@ -1,0 +1,20 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1>Lista Pracowników</h1>
+
+<ul>
+  <% employees.forEach(e => { %>
+    <li>
+      <strong>
+        <%= e.user.name %> <%= e.user.surname %>
+      </strong>
+      <br />
+      Email: <%= e.user.email %><br />
+      Stanowisko: <em><%= e.role %></em>
+    </li>
+    <br />
+  <% }) %>
+</ul>
+
+<a href="/employees">Powrót</a>

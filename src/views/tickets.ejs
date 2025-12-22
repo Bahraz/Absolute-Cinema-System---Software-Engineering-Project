@@ -1,0 +1,88 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1>Zarządzaj Ticketami</h1>
+
+<!-- ===================== -->
+<!-- LISTA / EDYCJA -->
+<!-- ===================== -->
+<h2>Edytuj ticket</h2>
+
+<select id="ticketSelect">
+  <option value="">--- wybierz ticket ---</option>
+  <% tickets.forEach(t => { %>
+  <option value="<%= t.id %>" data-status="<%= t.status %>">
+    Ticket <%= t.id.slice(-6) %> | <%= t.status %> | <%= t.amount %> zł
+  </option>
+  <% }) %>
+</select>
+
+<form id="editTicketForm">
+  <select name="status">
+    <option value="AKTYWNY">AKTYWNY</option>
+    <option value="WYGASŁY">WYGASŁY</option>
+  </select>
+
+  <button type="submit">Zapisz</button>
+</form>
+
+<script>
+  const select = document.getElementById("ticketSelect");
+  const form = document.getElementById("editTicketForm");
+
+  select.addEventListener("change", () => {
+    const opt = select.options[select.selectedIndex];
+    if (!opt.value) return;
+    form.status.value = opt.dataset.status;
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = select.value;
+    if (!id) return alert("Wybierz ticket");
+
+    const res = await fetch(`/api/ticket/update/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: form.status.value,
+      }),
+    });
+
+    if (res.ok) window.location.href = "/ticket/list";
+    else alert("Błąd edycji ticketa");
+  });
+</script>
+
+<hr />
+
+<!-- ===================== -->
+<!-- USUŃ -->
+<!-- ===================== -->
+<h2>Usuń ticket</h2>
+
+<select id="deleteTicketSelect">
+  <% tickets.forEach(t => { %>
+  <option value="<%= t.id %>">Ticket <%= t.id.slice(-6) %></option>
+  <% }) %>
+</select>
+
+<button id="deleteTicketBtn">Usuń</button>
+
+<script>
+  document
+    .getElementById("deleteTicketBtn")
+    .addEventListener("click", async () => {
+      const id = document.getElementById("deleteTicketSelect").value;
+
+      const res = await fetch(`/api/ticket/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) window.location.href = "/ticket/list";
+      else alert("Błąd usuwania");
+    });
+</script>
+
+<br />
+<a href="/ticket/list">Lista ticketów</a>

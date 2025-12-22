@@ -1,0 +1,173 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1>Zarządzaj Pracownikami</h1>
+
+<hr />
+
+<!-- ===================== -->
+<!-- DODAJ PRACOWNIKA -->
+<!-- ===================== -->
+<section>
+  <h2>Przypisz użytkownika do stanowiska</h2>
+
+  <form id="addEmployeeForm">
+    <label>
+      Użytkownik:
+      <select name="user_id" required>
+        <option value="">--- wybierz użytkownika ---</option>
+        <% users.forEach(u => { %>
+        <option value="<%= u.id %>">
+          <%= u.name %> <%= u.surname %> (<%= u.email %>)
+        </option>
+        <% }) %>
+      </select>
+    </label>
+
+    <br /><br />
+
+    <label>
+      Stanowisko:
+<select name="role" required>
+  <option value="">-- wybierz stanowisko --</option>
+  <option value="Pracownik">Pracownik</option>
+  <option value="Kierownik">Kierownik</option>
+</select>
+
+    <br /><br />
+
+    <button type="submit">Przypisz</button>
+  </form>
+</section>
+
+<script>
+  document
+    .getElementById("addEmployeeForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+
+      const res = await fetch("/api/employees/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: form.user_id.value,
+          role: form.role.value,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        window.location.href = "/employees/list";
+      } else {
+        alert(data.error || "Błąd przypisywania pracownika");
+      }
+    });
+</script>
+
+<hr />
+
+<!-- ===================== -->
+<!-- EDYTUJ STANOWISKO -->
+<!-- ===================== -->
+<section>
+  <h2>Edytuj stanowisko pracownika</h2>
+
+  <form id="editEmployeeForm">
+    <select id="editEmployeeSelect" required>
+      <option value="">--- wybierz pracownika ---</option>
+      <% employees.forEach(e => { %>
+      <option value="<%= e.id %>" data-role="<%= e.role %>">
+        <%= e.user.name %> <%= e.user.surname %> – <%= e.role %>
+      </option>
+      <% }) %>
+    </select>
+
+    <br /><br />
+
+    <select name="role" required>
+  <option value="">-- wybierz stanowisko --</option>
+  <option value="Pracownik">Pracownik</option>
+  <option value="Kierownik">Kierownik</option>
+</select>
+
+    <br /><br />
+
+    <button type="submit">Zaktualizuj</button>
+  </form>
+</section>
+
+<script>
+  const editSelect = document.getElementById("editEmployeeSelect");
+  const editForm = document.getElementById("editEmployeeForm");
+
+  editSelect.addEventListener("change", () => {
+    const option = editSelect.options[editSelect.selectedIndex];
+    editForm.role.value = option.dataset.role || "";
+  });
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = editSelect.value;
+
+    const res = await fetch(`/api/employees/update/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: editForm.role.value,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      window.location.href = "/employees/list";
+    } else {
+      alert(data.error || "Błąd edycji stanowiska");
+    }
+  });
+</script>
+
+<hr />
+
+<!-- ===================== -->
+<!-- USUŃ PRACOWNIKA -->
+<!-- ===================== -->
+<section>
+  <h2>Usuń pracownika</h2>
+
+  <select id="deleteEmployeeSelect">
+    <% employees.forEach(e => { %>
+    <option value="<%= e.id %>">
+      <%= e.user.name %> <%= e.user.surname %> – <%= e.role %>
+    </option>
+    <% }) %>
+  </select>
+
+  <button id="deleteEmployeeBtn">Usuń</button>
+</section>
+
+<script>
+  document
+    .getElementById("deleteEmployeeBtn")
+    .addEventListener("click", async () => {
+      const id = document.getElementById("deleteEmployeeSelect").value;
+
+      const res = await fetch(`/api/employees/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        window.location.href = "/employees/list";
+      } else {
+        alert("Błąd usuwania pracownika");
+      }
+    });
+</script>
+
+<hr />
+
+<a href="/employees/list">Lista pracowników</a>

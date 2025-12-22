@@ -1,0 +1,17 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br />
+
+<h2>Lista Seansów</h2>
+
+<ul>
+  <% screenings.forEach(s => { %>
+  <li>
+    <strong><%= s.movieTitle %></strong><br />
+    Sala: <%= s.hallName %><br />
+    Start: <%= s.startAt.toLocaleString() %>
+  </li>
+  <% }) %>
+</ul>
+
+<br />
+<a href="/screening">Powrót</a>

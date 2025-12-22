@@ -1,0 +1,40 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1><%= movie.title %></h1>
+
+<p><strong>Rok:</strong> <%= movie.release_year %></p>
+<p><strong>Czas trwania:</strong> <%= movie.duration %> min</p>
+
+<p><%= movie.description %></p>
+
+<hr>
+
+<h2>Gatunki</h2>
+
+<ul>
+  <% if (genres.length === 0) { %>
+    <li>Brak przypisanych gatunków</li>
+  <% } %>
+
+  <% genres.forEach(genre => { %>
+    <li><%= genre.name %></li>
+  <% }) %>
+</ul>
+
+<hr>
+
+<h2>Aktorzy</h2>
+
+<ul>
+  <% if (actors.length === 0) { %>
+    <li>Brak przypisanych aktorów</li>
+  <% } %>
+
+  <% actors.forEach(actor => { %>
+    <li><%= actor.name %> <%= actor.surname %></li>
+  <% }) %>
+</ul>
+
+<br /><br />
+<a href="/movie/list">Lista filmów</a>

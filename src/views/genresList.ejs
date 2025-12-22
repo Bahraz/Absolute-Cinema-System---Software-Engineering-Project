@@ -1,0 +1,15 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h2>Lista Gatunków</h2>
+
+<ul>
+  <% genres.forEach(genre => { %>
+  <li>
+    <strong><%= genre.name %></strong>
+  </li>
+  <% }) %>
+</ul>
+
+<br />
+<a href="/genre">Powrót</a>

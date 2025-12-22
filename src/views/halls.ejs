@@ -1,0 +1,141 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1>Zarządzaj Salami</h1>
+
+<!-- ===================== -->
+<!-- DODAJ SALĘ -->
+<!-- ===================== -->
+<div name="AddHall">
+  <section>
+    <h2>Dodaj salę</h2>
+
+    <form id="addHallForm">
+      <input name="name" type="text" placeholder="Nazwa sali..." required />
+      <button type="submit">Dodaj salę</button>
+    </form>
+  </section>
+
+  <script>
+    document
+      .getElementById("addHallForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+
+        const res = await fetch("/api/hall/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: form.name.value }),
+        });
+
+        if (res.ok) {
+          window.location.href = "/hall/list";
+        } else {
+          const err = await res.json();
+          alert(err.error || "Błąd dodawania sali");
+        }
+      });
+  </script>
+</div>
+
+<hr />
+
+<!-- ===================== -->
+<!-- EDYTUJ SALĘ -->
+<!-- ===================== -->
+<div name="UpdateHall">
+  <section>
+    <h2>Edytuj salę</h2>
+
+    <form id="editHallForm">
+      <select id="editHallSelect">
+        <option value="">--- wybierz salę ---</option>
+        <% halls.forEach(hall => { %>
+        <option value="<%= hall.id %>" data-name="<%= hall.name %>">
+          <%= hall.name %>
+        </option>
+        <% }) %>
+      </select>
+
+      <br /><br />
+
+      <input name="name" type="text" placeholder="Nowa nazwa sali..." />
+
+      <button type="submit">Zaktualizuj</button>
+    </form>
+  </section>
+
+  <script>
+    const editHallSelect = document.getElementById("editHallSelect");
+    const editHallForm = document.getElementById("editHallForm");
+
+    editHallSelect.addEventListener("change", () => {
+      const option = editHallSelect.options[editHallSelect.selectedIndex];
+      editHallForm.name.value = option.value ? option.dataset.name : "";
+    });
+
+    editHallForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const id = editHallSelect.value;
+      const name = editHallForm.name.value.trim();
+
+      if (!id || !name) {
+        alert("Wybierz salę i podaj nazwę");
+        return;
+      }
+
+      const res = await fetch(`/api/hall/update/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (res.ok) {
+        window.location.href = "/hall/list";
+      } else {
+        const err = await res.json();
+        alert(err.error || "Błąd edycji sali");
+      }
+    });
+  </script>
+</div>
+<hr />
+
+<!-- ===================== -->
+<!-- USUŃ SALĘ -->
+<!-- ===================== -->
+<div name="DeleteHall">
+  <section>
+    <h2>Usuń salę</h2>
+
+    <select id="deleteHallSelect">
+      <% halls.forEach(hall => { %>
+      <option value="<%= hall.id %>"><%= hall.name %></option>
+      <% }) %>
+    </select>
+
+    <button id="deleteHallBtn">Usuń</button>
+  </section>
+
+  <script>
+    document
+      .getElementById("deleteHallBtn")
+      .addEventListener("click", async () => {
+        const id = document.getElementById("deleteHallSelect").value;
+
+        const res = await fetch(`/api/hall/delete/${id}`, { method: "DELETE" });
+
+        if (res.ok) {
+          window.location.href = "/hall/list";
+        } else {
+          alert("Błąd usuwania sali");
+        }
+      });
+  </script>
+</div>
+
+<br /><br />
+<a href="/hall/list">Lista sal</a>

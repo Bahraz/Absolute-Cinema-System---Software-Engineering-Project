@@ -1,0 +1,178 @@
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
+
+<h1>Zarządzaj Seansami</h1>
+
+<!-- ===================== -->
+<!-- DODAJ SEANS -->
+<!-- ===================== -->
+<section>
+  <h2>Dodaj seans</h2>
+
+  <form id="addScreeningForm">
+    <select name="movie_id" required>
+      <option value="">--- wybierz film ---</option>
+      <% movies.forEach(movie => { %>
+      <option value="<%= movie.id %>"><%= movie.title %></option>
+      <% }) %>
+    </select>
+
+    <select name="hall_id" required>
+      <option value="">--- wybierz salę ---</option>
+      <% halls.forEach(hall => { %>
+      <option value="<%= hall.id %>"><%= hall.name %></option>
+      <% }) %>
+    </select>
+
+    <input type="datetime-local" name="start_at" required />
+
+    <button type="submit">Dodaj seans</button>
+  </form>
+</section>
+
+<script>
+  document
+    .getElementById("addScreeningForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const f = e.target;
+
+      const res = await fetch("/api/screening/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          movie_id: f.movie_id.value,
+          hall_id: f.hall_id.value,
+          start_at: f.start_at.value,
+        }),
+      });
+
+      if (res.ok) {
+        window.location.href = "/screening/list";
+      } else {
+        alert("Błąd dodawania seansu");
+      }
+    });
+</script>
+
+<hr />
+
+<!-- ===================== -->
+<!-- EDYTUJ SEANS -->
+<!-- ===================== -->
+<section>
+  <h2>Edytuj seans</h2>
+
+  <form id="editScreeningForm">
+    <select id="editScreeningSelect">
+      <option value="">--- wybierz seans ---</option>
+      <% screenings.forEach(s => { %>
+      <option
+        value="<%= s.id %>"
+        data-movie="<%= s.movie.id %>"
+        data-hall="<%= s.hall.id %>"
+        data-start="<%= s.startAt.toISOString().slice(0,16) %>"
+      >
+        <%= s.movie.title %> | <%= s.hall.name %> | <%=
+        s.startAt.toLocaleString() %>
+      </option>
+      <% }) %>
+    </select>
+
+    <br /><br />
+
+    <select name="movie_id" required>
+      <% movies.forEach(movie => { %>
+      <option value="<%= movie.id %>"><%= movie.title %></option>
+      <% }) %>
+    </select>
+
+    <select name="hall_id" required>
+      <% halls.forEach(hall => { %>
+      <option value="<%= hall.id %>"><%= hall.name %></option>
+      <% }) %>
+    </select>
+
+    <input type="datetime-local" name="start_at" required />
+
+    <button type="submit">Zapisz zmiany</button>
+  </form>
+</section>
+
+<script>
+  const select = document.getElementById("editScreeningSelect");
+  const form = document.getElementById("editScreeningForm");
+
+  select.addEventListener("change", () => {
+    const o = select.options[select.selectedIndex];
+    if (!o.value) return;
+
+    form.movie_id.value = o.dataset.movie;
+    form.hall_id.value = o.dataset.hall;
+    form.start_at.value = o.dataset.start;
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = select.value;
+    if (!id) return alert("Wybierz seans");
+
+    const res = await fetch(`/api/screening/update/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        movie_id: form.movie_id.value,
+        hall_id: form.hall_id.value,
+        start_at: form.start_at.value,
+      }),
+    });
+
+    if (res.ok) {
+      window.location.href = "/screening/list";
+    } else {
+      alert("Błąd edycji seansu");
+    }
+  });
+</script>
+
+<hr />
+
+<!-- ===================== -->
+<!-- USUŃ SEANS -->
+<!-- ===================== -->
+<section>
+  <h2>Usuń seans</h2>
+
+  <select id="deleteScreeningSelect">
+    <% screenings.forEach(s => { %>
+    <option value="<%= s.id %>">
+      <%= s.movie.title %> | <%= s.hall.name %> | <%= s.startAt.toLocaleString()
+      %>
+    </option>
+    <% }) %>
+  </select>
+
+  <button id="deleteScreeningBtn">Usuń</button>
+</section>
+
+<script>
+  document
+    .getElementById("deleteScreeningBtn")
+    .addEventListener("click", async () => {
+      const id = document.getElementById("deleteScreeningSelect").value;
+
+      const res = await fetch(`/api/screening/delete/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        window.location.href = "/screening/list";
+      } else {
+        alert("Błąd usuwania seansu");
+      }
+    });
+</script>
+
+<br />
+<a href="/screening/list">Lista seansów</a>

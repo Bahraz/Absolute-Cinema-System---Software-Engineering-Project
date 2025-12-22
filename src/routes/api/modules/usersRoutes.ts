@@ -1,19 +1,13 @@
 import express from "express";
-import { userController } from '@controllers/userController';
-
+import { userController } from "@controllers/user";
 
 const router = express.Router();
 
-router.get("/show", (req, res) => userController.getAll(req, res));
-
-//poprawka - sprawdzenie
-router.get("/show/:id", (req, res) => userController.getOne(req, res));
-router.post("/register", (req, res) => userController.create(req, res));
-
-//poprawka - sprawdzenie
-router.put("/edit/:id", (req, res) => userController.update(req, res));
+router.get("/show", (req, res) => userController.show(req, res));
+router.post("/create", (req, res) => userController.create(req, res));
+router.patch("/update/:id", (req, res) => userController.update(req, res));
 router.delete("/delete/:id", (req, res) => userController.delete(req, res));
-router.post("/login/:id", (req, res) => userController.login(req, res));
-router.get("/profile/:user_id", (req, res) => userController.getRoles(req, res));
+
+//#TODO: Rejestracja, logowanie, zmiana hasła, edycja profilu
 
 export { router };

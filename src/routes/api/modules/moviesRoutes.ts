@@ -1,16 +1,20 @@
 import express from "express";
-import { moviesController } from "@controllers/moviesController";
+import { movieController } from "@controllers/movie";
 
 const router = express.Router();
 
-router.get("/show", (req, res) => moviesController.getAll(req, res));
-router.get("/show-one/:movie_id", (req, res) => moviesController.getOne(req, res));
-router.post("/add", (req, res) => moviesController.create(req, res));
-router.post("/add-actor", (req, res) => moviesController.addActor(req, res));
-router.post("/add-genre", (req, res) => moviesController.addGenre(req, res));
+router.get("/show", (req, res) => movieController.show(req, res));
+router.post("/create", (req, res) => movieController.create(req, res));
+router.patch("/update/:id", (req, res) => movieController.update(req, res));
+router.delete("/delete/:id", (req, res) => movieController.delete(req, res));
+router.get("/:id", movieController.movieDetails);
+router.post("/:movieId/actors", movieController.addActorMovie);
+router.post("/:movieId/genres", movieController.addGenreMovie);
 
-//poprawka - sprawdzenie
-router.put("/update/:movie_id", (req, res) => moviesController.update(req, res));
-router.delete("/delete/:movie_id", (req, res) => moviesController.delete(req, res));
+router.delete("/:movieId/actors/:actorId", movieController.removeActorMovie);
+router.delete("/:movieId/genres/:genreId", movieController.removeGenreMovie);
+
+router.get("/:movieId/actors", movieController.getActorsByMovie);
+router.get("/:movieId/genres", movieController.getGenresByMovie);
 
 export { router };

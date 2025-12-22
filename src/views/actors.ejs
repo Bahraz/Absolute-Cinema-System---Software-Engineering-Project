@@ -1,34 +1,168 @@
-<a href="/">Strona Główna</a>
+<a href="/">Strona Główna</a><br />
+<a href="/admin">Admin Panel</a><br /><br />
 
-<h2>Dodaj aktora</h2>
-<form method="POST" action="/api/actors/add">
-  <input name="name" type="text" placeholder="Imie aktora..." />
-  <input name="surname" type="text" placeholder="Nazwisko aktora..." />
-  <button type="submit">Wyślij</button>
-</form>
+<h1>Zarządzaj Aktorami</h1>
 
-<h2>Edytuj aktora</h2>
-<form method="POST" action="/api/actors/update">
-  <select name="id">
-    <% actors.forEach(actor => { %>
-    <option value="<%= actor._id %>">
-      <%= actor.name %> <%= actor.surname %>
-    </option>
-    <% }) %>
-  </select>
-  <input name="name" type="text" placeholder="Imię aktora..." />
-  <input name="surname" type="text" placeholder="Nazwisko aktora..." />
-  <button type="submit">Zaktualizuj</button>
-</form>
+<!-- ===================== -->
+<!-- DODAJ AKTORA -->
+<!-- ===================== -->
+<div name="AddActor">
+  <section>
+    <h2>Dodaj aktora</h2>
 
-<h2>Usuń aktora</h2>
-<form method="POST" action="/api/actors/delete">
-  <select name="id">
-    <% actors.forEach(actor => { %>
-    <option value="<%= actor._id %>">
-      <%= actor.name %> <%= actor.surname %>
-    </option>
-    <% }) %>
-  </select>
-  <button type="submit">Usuń</button>
-</form>
+    <form id="addActorForm">
+      <input name="name" type="text" placeholder="Imię aktora..." required />
+      <input
+        name="surname"
+        type="text"
+        placeholder="Nazwisko aktora..."
+        required
+      />
+      <button type="submit">Dodaj aktora</button>
+    </form>
+  </section>
+
+  <script>
+    document
+      .getElementById("addActorForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+
+        const res = await fetch("/api/actor/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.value,
+            surname: form.surname.value,
+          }),
+        });
+
+        if (res.ok) {
+          window.location.href = "/actor/list";
+        } else {
+          const err = await res.json();
+          alert(err.error || "Błąd dodawania aktora");
+        }
+      });
+  </script>
+</div>
+<hr />
+
+<!-- ===================== -->
+<!-- EDYTUJ AKTORA -->
+<!-- ===================== -->
+<div name="UpdateActor">
+  <section>
+    <h2>Edytuj aktora</h2>
+
+    <form id="editActorForm">
+      <select id="editActorSelect">
+        <option value="">--- wybierz aktora ---</option>
+        <% actors.forEach(actor => { %>
+        <option
+          value="<%= actor.id %>"
+          data-name="<%= actor.name %>"
+          data-surname="<%= actor.surname %>"
+        >
+          <%= actor.name %> <%= actor.surname %>
+        </option>
+        <% }) %>
+      </select>
+
+      <br /><br />
+
+      <input name="name" type="text" placeholder="Imię aktora..." />
+      <input name="surname" type="text" placeholder="Nazwisko aktora..." />
+
+      <button type="submit">Zaktualizuj</button>
+    </form>
+  </section>
+
+  <script>
+    const editSelect = document.getElementById("editActorSelect");
+    const editForm = document.getElementById("editActorForm");
+
+    editSelect.addEventListener("change", () => {
+      const option = editSelect.options[editSelect.selectedIndex];
+
+      if (!option.value) {
+        editForm.name.value = "";
+        editForm.surname.value = "";
+        return;
+      }
+
+      editForm.name.value = option.dataset.name || "";
+      editForm.surname.value = option.dataset.surname || "";
+    });
+
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const id = editSelect.value;
+      const name = editForm.name.value.trim();
+      const surname = editForm.surname.value.trim();
+
+      if (!id || !name || !surname) {
+        alert("Uzupełnij poprawnie dane");
+        return;
+      }
+
+      const res = await fetch(`/api/actor/update/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, surname }),
+      });
+
+      if (res.ok) {
+        window.location.href = "/actor/list";
+      } else {
+        const err = await res.json();
+        alert(err.error || "Błąd edycji aktora");
+      }
+    });
+  </script>
+</div>
+
+<hr />
+
+<!-- ===================== -->
+<!-- USUŃ AKTORA -->
+<!-- ===================== -->
+<div name="DeleteActor">
+  <section>
+    <h2>Usuń aktora</h2>
+
+    <select id="deleteActorSelect">
+      <% actors.forEach(actor => { %>
+      <option value="<%= actor.id %>">
+        <%= actor.name %> <%= actor.surname %>
+      </option>
+      <% }) %>
+    </select>
+
+    <button id="deleteActorBtn">Usuń</button>
+  </section>
+
+  <script>
+    document
+      .getElementById("deleteActorBtn")
+      .addEventListener("click", async () => {
+        const id = document.getElementById("deleteActorSelect").value;
+
+        const res = await fetch(`/api/actor/delete/${id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          window.location.href = "/actor/list";
+        } else {
+          alert("Błąd usuwania aktora");
+        }
+      });
+  </script>
+</div>
+
+<br /><br />
+<a href="/actor/list">Lista aktorów</a>

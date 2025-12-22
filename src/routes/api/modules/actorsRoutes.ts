@@ -1,13 +1,11 @@
 import express from "express";
-import { actorsController } from "@controllers/actorsController";
+import { actorController } from "@controllers/actor";
 
 const router = express.Router();
 
-router.get("/show", (req, res) => actorsController.show(req, res));
-router.post("/add", (req, res) => actorsController.add(req, res));
-
-//poprawka - sprawdzenie
-router.put("/update/:id", (req, res) => actorsController.update(req, res));
-router.delete("/delete/:id", (req, res) => actorsController.delete(req, res));
+router.get("/show", (req, res) => actorController.show(req, res));
+router.post("/create", (req, res) => actorController.create(req, res));
+router.patch("/update/:id", (req, res) => actorController.update(req, res));
+router.delete("/delete/:id", (req, res) => actorController.delete(req, res));
 
 export { router };
