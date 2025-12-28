@@ -14,6 +14,7 @@ export class ReservationsController {
   async create(req: Request, res: Response) {
     const session = await mongoose.startSession();
     session.startTransaction();
+
     try {
       const {
         user_id,
@@ -22,6 +23,7 @@ export class ReservationsController {
         payment_provider,
         payment_status,
       } = req.body;
+
       if (!payment_provider || !payment_status) {
         await session.abortTransaction();
         session.endSession();
@@ -29,6 +31,7 @@ export class ReservationsController {
           error: "Wymagane: metoda i status płatności",
         });
       }
+
       if (
         !user_id ||
         !screening_id ||
@@ -59,6 +62,7 @@ export class ReservationsController {
         })
           .session(session)
           .lean();
+
         if (existingTicket) {
           await session.abortTransaction();
           session.endSession();
@@ -70,15 +74,18 @@ export class ReservationsController {
 
       // Oblicz kwotę całkowitą (base_price + typ miejsca.price jeśli dostępny)
       let total_amount = 0;
+      
       for (const sid of seat_ids) {
         const seat = await Seat.findById(sid)
           .populate("hall_id")
           .session(session);
+
         if (!seat) {
           await session.abortTransaction();
           session.endSession();
           return res.status(404).json({ error: `Miejsce ${sid} nie istnieje` });
         }
+        
         const seatTypePrice = (seat as any).seat_type_id?.price ?? 0;
         const base = (screening as any).base_price ?? 0;
         total_amount += base + seatTypePrice;
@@ -101,6 +108,7 @@ export class ReservationsController {
 
       // Sprawdź czy miejsce istnieje
       const seat = await Seat.findById(seat_id).session(session);
+
       if (!seat) {
         await session.abortTransaction();
         session.endSession();
@@ -112,6 +120,7 @@ export class ReservationsController {
       // Upewnij się, że miejsce należy do tej samej sali co seans
       const seatHallId = (seat as any).hall_id?.toString();
       const screeningHallId = (screening as any).hall_id?.toString();
+      
       if (seatHallId && screeningHallId && seatHallId !== screeningHallId) {
         await session.abortTransaction();
         session.endSession();
@@ -125,6 +134,7 @@ export class ReservationsController {
         screening_id,
         seats_id: seat_id,
       }).session(session);
+
       if (existingRes) {
         await session.abortTransaction();
         session.endSession();
@@ -163,6 +173,7 @@ export class ReservationsController {
     } catch (err: any) {
       await session.abortTransaction();
       session.endSession();
+
       if (err.code === 11000) {
         return res.status(409).json({ error: "Konflikt (duplikat)" });
       }
@@ -303,6 +314,7 @@ export class ReservationsController {
   // === DELETE ===
   async delete(req: Request, res: Response) {
     const id = req.params.id;
+
     try {
       const reservation = await Reservation.findById(id);
       if (!reservation)
@@ -310,10 +322,12 @@ export class ReservationsController {
 
       // usuń powiązany bilet i płatność jeśli istnieją
       const ticketId = (reservation as any).ticket_id;
+      
       if (ticketId) {
         const ticket = await Ticket.findById(ticketId);
         if (ticket) {
           const paymentId = (ticket as any).payment_id;
+          
           if (paymentId) await Payment.findByIdAndDelete(paymentId);
           await Ticket.findByIdAndDelete(ticketId);
         }

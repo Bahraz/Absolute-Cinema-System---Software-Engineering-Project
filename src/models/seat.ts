@@ -10,7 +10,7 @@ export interface ISeat extends Document {
 const SeatSchema: Schema = new Schema({
   _id: { type: Schema.Types.ObjectId, auto: true },
   hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
-  row: { type: Number, rrequired: true },
+  row: { type: Number, required: true },
   seat_number: { type: Number, required: true },
 });
 

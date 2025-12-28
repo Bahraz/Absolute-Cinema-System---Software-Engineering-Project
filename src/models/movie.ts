@@ -13,7 +13,7 @@ const MovieSchema: Schema = new Schema({
   title: { type: String, required: true, trim: true },
   duration: { type: Number, required: true },
   release_year: { type: Number, required: true },
-  description: { type: String, reuqire: true}
+  description: { type: String, required: true}
 });
 
 export const Movie = mongoose.model<IMovie>("Movie", MovieSchema);
