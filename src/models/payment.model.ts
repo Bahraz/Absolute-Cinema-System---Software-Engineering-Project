@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-console.log("PAYMENT REGISTERED IN:", mongoose.connection.id);
 
 export interface IPayment extends Document {
   _id: mongoose.Types.ObjectId;
