@@ -1,0 +1,57 @@
+<%- include("partials/header", { title: "Filmy" }) %>
+<%- include("partials/sidebar") %>
+
+<h1>Filmy</h1>
+
+<hr />
+
+<h2>Lista filmów</h2>
+
+<ul>
+  <% if (movies.length === 0) { %>
+    <li>Brak filmów</li>
+  <% } %>
+
+  <% movies.forEach(m => { %>
+    <li>
+      <b><%= m.title %></b>
+      (<%= m.release_year %>, <%= m.duration %> min)
+      —
+      <a href="/admin/movies/<%= m._id %>">Szczegóły</a>
+    </li>
+  <% }) %>
+</ul>
+
+<hr />
+
+<h2>Dodaj film</h2>
+
+<form id="addMovie">
+  <input name="title" placeholder="Tytuł" required /><br />
+  <input name="release_year" type="number" placeholder="Rok" required /><br />
+  <input name="duration" type="number" placeholder="Czas (min)" required /><br />
+  <textarea name="description" placeholder="Opis" required></textarea><br />
+  <button>Dodaj film</button>
+</form>
+
+<script>
+document.getElementById("addMovie").onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target;
+
+  await fetch("/api/admin/movies", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: f.title.value,
+      release_year: f.release_year.value,
+      duration: f.duration.value,
+      description: f.description.value
+    })
+  });
+
+  location.reload();
+};
+</script>
+
+<%- include("partials/footer") %>

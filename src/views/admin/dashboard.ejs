@@ -1,0 +1,72 @@
+<%- include("partials/header", { title: "Dashboard" }) %> <%-
+include("partials/sidebar") %>
+
+<main class="content">
+  <h1>Dashboard</h1>
+
+  <div class="stats-grid">
+    <div class="card">Użytkownicy <b id="users">–</b></div>
+    <div class="card">Pracownicy <b id="employees">–</b></div>
+    <div class="card">Filmy <b id="movies">–</b></div>
+    <div class="card">Seanse <b id="screenings">–</b></div>
+    <div class="card">Rezerwacje <b id="reservations">–</b></div>
+  </div>
+
+  <h2>Nadchodzące seanse</h2>
+
+  <table
+    width="60%"
+    cellpadding="10"
+    cellspacing="0"
+    style="border-collapse: collapse"
+  >
+    <colgroup>
+      <col style="width: 45%" />
+      <col style="width: 25%" />
+      <col style="width: 30%" />
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th align="left">Film</th>
+        <th align="left">Sala</th>
+        <th align="left">Data</th>
+      </tr>
+    </thead>
+    <tbody id="upcoming">
+      <tr>
+        <td colspan="3">Ładowanie...</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+
+<script>
+  async function loadDashboard() {
+    const res = await fetch("/api/admin/dashboard");
+    const data = await res.json();
+
+    users.innerText = data.users;
+    employees.innerText = data.employees;
+    movies.innerText = data.movies;
+    screenings.innerText = data.screenings;
+    reservations.innerText = data.reservations;
+
+    const tbody = document.getElementById("upcoming");
+    tbody.innerHTML = "";
+
+    data.upcomingScreenings.forEach((s) => {
+      tbody.innerHTML += `
+    <tr>
+      <td>${s.movie_id.title}</td>
+      <td>${s.hall_id.name}</td>
+      <td>${new Date(s.start_at).toLocaleString()}</td>
+    </tr>
+  `;
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", loadDashboard);
+</script>
+
+<%- include("partials/footer") %>

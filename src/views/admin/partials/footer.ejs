@@ -1,0 +1,15 @@
+</div> <!-- admin-layout -->
+
+<script> async function logout() {
+  const res = await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (res.ok) {
+    window.location.href = "/login";
+  }
+}
+</script>
+</body>
+</html>

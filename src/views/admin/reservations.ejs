@@ -1,0 +1,293 @@
+<%- include("partials/header", { title: "Rezerwacje" }) %>
+<%- include("partials/sidebar") %>
+
+<h1>Rezerwacje</h1>
+
+<div class="reservations">
+  <% reservations.forEach(r => { %>
+    <div class="reservation-card" data-id="<%= r._id %>">
+
+      <!-- ===== HEADER ===== -->
+      <div class="header">
+        <div class="movie">
+          🎬 <b><%= r.screening_id.movie_id.title %></b>
+        </div>
+        <div class="details">
+          🏛️ Sala: <%= r.screening_id.hall_id.name %> |
+          🕒 <%= new Date(r.screening_id.start_at).toLocaleString() %>
+        </div>
+      </div>
+
+      <!-- ===== BODY ===== -->
+      <div class="body">
+
+        <!-- USER -->
+        <div class="block">
+          <h4>Użytkownik</h4>
+          <div><b><%= r.user_id.name %> <%= r.user_id.surname %></b></div>
+          <div><%= r.user_id.email %></div>
+          <div class="muted">Rezerwacja ID: <%= r._id %></div>
+        </div>
+
+        <!-- SEAT -->
+        <div class="block">
+          <h4>Miejsce</h4>
+          Rząd <b><%= r.seats_id.row %></b>,
+          miejsce <b><%= r.seats_id.seat_number %></b>
+        </div>
+
+        <!-- TICKET -->
+        <div class="block">
+          <h4>Bilet</h4>
+          <% if (r.ticket_id) { %>
+            ID: <%= r.ticket_id._id %><br/>
+            Kwota: <b><%= r.ticket_id.amount %> zł</b><br/>
+            Status: <%= r.ticket_id.status %>
+          <% } else { %>
+            Brak biletu
+          <% } %>
+        </div>
+
+        <!-- PAYMENT -->
+        <div class="block">
+          <h4>Płatność</h4>
+          <% if (r.ticket_id?.payment_id) { %>
+            ID: <%= r.ticket_id.payment_id._id %><br/>
+
+            <select
+              class="paymentStatus"
+              data-payment-id="<%= r.ticket_id.payment_id._id %>">
+              <% ["ZAINICJOWANA","W TRAKCIE","OPŁACONA","NIEUDANA","ZWRÓCONO"].forEach(s => { %>
+                <option
+                  value="<%= s %>"
+                  <%= s === r.ticket_id.payment_id.status ? "selected" : "" %>>
+                  <%= s %>
+                </option>
+              <% }) %>
+            </select>
+
+            <button class="savePayment">Zapisz</button>
+          <% } else { %>
+            Brak płatności
+          <% } %>
+        </div>
+
+      </div>
+
+      <!-- ===== FOOTER ===== -->
+      <div class="footer">
+        <div>
+<label>Zmień seans:</label>
+<select class="screeningSelect">
+  <% screenings.forEach(s => { %>
+    <option value="<%= s._id %>">
+      <%= s.movie_id.title %> | <%= s.hall_id.name %>
+    </option>
+  <% }) %>
+</select>
+
+<label>Miejsce:</label>
+<select class="seatSelect">
+  <option>Wybierz seans</option>
+</select>
+          <button class="saveReservation">Zapisz seans</button>
+        </div>
+
+        <div class="actions">
+          <button class="deleteReservation danger">Usuń rezerwację</button>
+          <span class="msg"></span>
+        </div>
+      </div>
+
+    </div>
+  <% }) %>
+</div>
+
+<style>
+.reservations {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reservation-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  padding: 14px;
+}
+
+.header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.header .movie {
+  font-size: 1.1em;
+}
+
+.header .details {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.block h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.danger {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.msg {
+  opacity: 0;
+  transition: .2s;
+  color: green;
+}
+.msg.show { opacity: 1; }
+.msg.error { color: red; }
+
+.muted {
+  color: #888;
+  font-size: 0.85em;
+}
+</style>
+
+<%- include("partials/footer") %>
+
+
+<script>
+function showMsg(el, text, error = false) {
+  const msg = el.querySelector(".msg");
+  msg.innerText = text;
+  msg.classList.add("show");
+  msg.classList.toggle("error", error);
+
+  setTimeout(() => {
+    msg.classList.remove("show","error");
+    msg.innerText = "";
+  }, 1500);
+}
+
+document.querySelectorAll(".screeningSelect").forEach(select => {
+  select.onchange = async e => {
+    const li = e.target.closest(".reservation-card");
+    const seatSelect = li.querySelector(".seatSelect");
+    const screeningId = e.target.value;
+
+    seatSelect.innerHTML = "<option>Ładowanie...</option>";
+
+    const res = await fetch(
+      `/api/admin/reservations/screenings/${screeningId}/seats`
+    );
+
+    const seats = await res.json();
+
+    seatSelect.innerHTML = "";
+
+    seats.forEach(seat => {
+      const opt = document.createElement("option");
+      opt.value = seat._id;
+      opt.innerText = `Rząd ${seat.row}, miejsce ${seat.seat_number}`;
+      seatSelect.appendChild(opt);
+    });
+  };
+});
+
+/* ===== UPDATE PAYMENT ===== */
+document.querySelectorAll(".savePayment").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+    const select = li.querySelector(".paymentStatus");
+    const status = select.value;
+    const paymentId = select.dataset.paymentId;
+
+    const res = await fetch(
+      `/api/admin/payments/${paymentId}/status`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMsg(li, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(li, "Zmieniono status płatności");
+  };
+});
+
+/* ===== UPDATE RESERVATION (SCREENING) ===== */
+document.querySelectorAll(".saveReservation").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+    const screeningId = li.querySelector(".screeningSelect").value;
+
+    const res = await fetch(
+      `/api/admin/reservations/${li.dataset.id}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ screening_id: screeningId })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMsg(li, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(li, "Zmieniono seans");
+  };
+});
+
+/* ===== DELETE RESERVATION ===== */
+document.querySelectorAll(".deleteReservation").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+
+    await fetch(`/api/admin/reservations/${li.dataset.id}`, {
+      method: "DELETE"
+    });
+
+    showMsg(li, "Usunięto");
+    setTimeout(() => li.remove(), 400);
+  };
+});
+</script>
+
+<%- include("partials/footer") %>

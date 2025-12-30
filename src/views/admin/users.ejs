@@ -1,0 +1,159 @@
+<%- include("partials/header", { title: "Użytkownicy" }) %> <%-
+include("partials/sidebar") %>
+
+<h1>Użytkownicy</h1>
+
+<ul class="users">
+  <% users.forEach(u => { %>
+  <li data-id="<%= u._id %>" class="<%= u.is_active ? '' : 'inactive' %>">
+    <input class="name" value="<%= u.name %>" size="10" />
+    <input class="surname" value="<%= u.surname || '' %>" size="10" />
+    <input class="email" value="<%= u.email %>" size="20" />
+
+    <button class="save">Zapisz</button>
+
+    <input
+      type="password"
+      class="password"
+      placeholder="Nowe hasło"
+      size="10"
+    />
+    <button class="savePassword">Hasło</button>
+
+    <button class="toggle">
+      <%= u.is_active ? "Dezaktywuj" : "Aktywuj" %>
+    </button>
+
+    <span class="status"> <%= u.is_active ? "AKTYWNY" : "NIEAKTYWNY" %> </span>
+
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<style>
+  .users {
+    list-style: none;
+    padding: 0;
+    max-width: 900px;
+  }
+  .users li {
+    margin-bottom: 6px;
+  }
+  .users li.inactive {
+    opacity: 0.5;
+  }
+  input,
+  button {
+    margin-left: 4px;
+  }
+  .status {
+    margin-left: 8px;
+    font-size: 0.8em;
+    color: #555;
+  }
+  .msg {
+    margin-left: 6px;
+    opacity: 0;
+    transition: 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  function showMsg(li, text, error = false) {
+    const msg = li.querySelector(".msg");
+    msg.innerText = text;
+    msg.style.color = error ? "red" : "green";
+    msg.classList.add("show");
+    setTimeout(() => {
+      msg.classList.remove("show");
+      msg.innerText = "";
+    }, 1200);
+  }
+
+  /* ===== UPDATE DATA ===== */
+  document.querySelectorAll(".save").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      const res = await fetch(`/api/admin/users/${li.dataset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: li.querySelector(".name").value,
+          surname: li.querySelector(".surname").value,
+          email: li.querySelector(".email").value,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(li, data.error || "Błąd", true);
+        return;
+      }
+
+      showMsg(li, "Zapisano dane");
+    };
+  });
+
+  /* ===== UPDATE PASSWORD ===== */
+  document.querySelectorAll(".savePassword").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+      const password = li.querySelector(".password").value;
+
+      if (!password) {
+        showMsg(li, "Brak hasła", true);
+        return;
+      }
+
+      const res = await fetch(`/api/admin/users/${li.dataset.id}/password`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        showMsg(li, data.error || "Błąd", true);
+        return;
+      }
+
+      li.querySelector(".password").value = "";
+      showMsg(li, "Hasło zmienione");
+    };
+  });
+
+  /* ===== TOGGLE ACTIVE ===== */
+  document.querySelectorAll(".toggle").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      const res = await fetch(
+        `/api/admin/users/${li.dataset.id}/toggle-active`,
+        { method: "PATCH" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(li, data.error || "Błąd", true);
+        return;
+      }
+
+      li.classList.toggle("inactive");
+      btn.innerText = data.is_active ? "Dezaktywuj" : "Aktywuj";
+      li.querySelector(".status").innerText = data.is_active
+        ? "AKTYWNY"
+        : "NIEAKTYWNY";
+
+      showMsg(li, "Zmieniono status");
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

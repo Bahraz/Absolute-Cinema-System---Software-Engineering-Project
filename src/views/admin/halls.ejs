@@ -1,0 +1,16 @@
+<%- include("partials/header", { title: "Sale" }) %>
+<%- include("partials/sidebar") %>
+
+<h1>Sale kinowe</h1>
+
+<ul>
+  <% halls.forEach(h => { %>
+    <li>
+      <b><%= h.name %></b>
+      —
+      <a href="/admin/halls/<%= h._id %>">Miejsca</a>
+    </li>
+  <% }) %>
+</ul>
+
+<%- include("partials/footer") %>

@@ -1,12 +1,18 @@
-import "express-session";
+import { UserRole } from "@services/auth.service";
+import { EmployeeRole } from "@models/employees.model";
 
-declare module "express-session" {
-  interface SessionData {
-    user?: {
-      _id: string;
-      name: string;
-      email: string;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      user: {
+        id: string;
+        role: UserRole;
+        email: string;
+        name: string;
+
+        employeeRole?: EmployeeRole | null;
+      };
+    }
   }
 }
 

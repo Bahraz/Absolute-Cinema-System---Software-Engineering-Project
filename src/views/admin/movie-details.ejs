@@ -1,0 +1,154 @@
+<%- include("partials/header", { title: movie.title }) %> <%-
+include("partials/sidebar") %>
+
+<h1><%= movie.title %></h1>
+
+<p><b>Rok:</b> <%= movie.release_year %></p>
+<p><b>Czas:</b> <%= movie.duration %> min</p>
+<p><%= movie.description %></p>
+
+<hr />
+
+<style>
+  .msg {
+    margin-left: 10px;
+    color: green;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+  }
+  .msg.error {
+    color: red;
+  }
+</style>
+
+<script>
+  function showMsg(el, text, error = false) {
+    const msg = el.querySelector(".msg");
+    msg.innerText = text;
+    msg.classList.add("show");
+    msg.classList.toggle("error", error);
+
+    setTimeout(() => {
+      msg.classList.remove("show", "error");
+      msg.innerText = "";
+    }, 1500);
+  }
+</script>
+
+<!-- ================= ACTORS ================= -->
+
+<h2>Aktorzy</h2>
+
+<select id="actorSelect">
+  <% allActors.forEach(a => { %>
+  <option value="<%= a._id %>"><%= a.name %> <%= a.surname %></option>
+  <% }) %>
+</select>
+
+<button id="addActor">Dodaj aktora</button>
+<span class="msg"></span>
+
+<ul>
+  <% actors.forEach(a => { %>
+  <li data-id="<%= a._id %>">
+    <%= a.name %> <%= a.surname %>
+    <button class="removeActor">Usuń</button>
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<hr />
+
+<!-- ================= GENRES ================= -->
+
+<h2>Gatunki</h2>
+
+<select id="genreSelect">
+  <% allGenres.forEach(g => { %>
+  <option value="<%= g._id %>"><%= g.name %></option>
+  <% }) %>
+</select>
+
+<button id="addGenre">Dodaj gatunek</button>
+<span class="msg"></span>
+
+<ul>
+  <% genres.forEach(g => { %>
+  <li data-id="<%= g._id %>">
+    <%= g.name %>
+    <button class="removeGenre">Usuń</button>
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<script>
+  const movieId = "<%= movie._id %>";
+
+  /* ===== ACTORS ===== */
+  document.getElementById("addActor").onclick = async () => {
+    const actorId = document.getElementById("actorSelect").value;
+    const box = document.getElementById("addActor").parentElement;
+
+    const res = await fetch(`/api/admin/movies/${movieId}/actors/${actorId}`, {
+      method: "POST",
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      showMsg(box, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(box, "Dodano");
+    setTimeout(() => location.reload(), 500);
+  };
+
+  document.querySelectorAll(".removeActor").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+      await fetch(`/api/admin/movies/${movieId}/actors/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+      showMsg(li, "Usunięto");
+      setTimeout(() => li.remove(), 300);
+    };
+  });
+
+  /* ===== GENRES ===== */
+  document.getElementById("addGenre").onclick = async () => {
+    const genreId = document.getElementById("genreSelect").value;
+    const box = document.getElementById("addGenre").parentElement;
+
+    const res = await fetch(`/api/admin/movies/${movieId}/genres/${genreId}`, {
+      method: "POST",
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      showMsg(box, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(box, "Dodano");
+    setTimeout(() => location.reload(), 500);
+  };
+
+  document.querySelectorAll(".removeGenre").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+      await fetch(`/api/admin/movies/${movieId}/genres/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+      showMsg(li, "Usunięto");
+      setTimeout(() => li.remove(), 300);
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

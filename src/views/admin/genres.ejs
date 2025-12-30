@@ -1,0 +1,106 @@
+<%- include("partials/header", { title: "Gatunki" }) %> <%-
+include("partials/sidebar") %>
+
+<h1>Gatunki</h1>
+
+<form id="addGenre">
+  <input name="name" placeholder="Nazwa gatunku" required />
+  <button>Dodaj</button>
+  <span class="msg"></span>
+</form>
+
+<hr />
+
+<ul id="genres">
+  <% genres.forEach(genre => { %>
+  <li data-id="<%= genre._id %>">
+    <input class="name" value="<%= genre.name %>" />
+    <button class="save">Zapisz</button>
+    <button class="delete">Usuń</button>
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<style>
+  .msg {
+    margin-left: 10px;
+    color: green;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  function showMsg(container, text = "Zapisano", isError = false) {
+    const msg = container.querySelector(".msg");
+    if (!msg) return;
+
+    msg.innerText = text;
+    msg.classList.add("show");
+    msg.classList.toggle("error", isError);
+
+    setTimeout(() => {
+      msg.classList.remove("show", "error");
+      msg.innerText = "";
+    }, 1800);
+  }
+
+  document.getElementById("addGenre").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target;
+
+    const res = await fetch("/api/admin/genres", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: f.name.value }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMsg(f, data.error || "Błąd");
+      return;
+    }
+
+    showMsg(f, "Dodano");
+    f.reset();
+
+    setTimeout(() => location.reload(), 600);
+  };
+
+  document.querySelectorAll(".save").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      await fetch(`/api/admin/genres/${li.dataset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: li.querySelector(".name").value,
+        }),
+      });
+
+      showMsg(li, "Zapisano");
+    };
+  });
+
+  document.querySelectorAll(".delete").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      await fetch(`/api/admin/genres/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+
+      showMsg(li, "Usunięto");
+      setTimeout(() => li.remove(), 600);
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

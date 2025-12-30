@@ -1,0 +1,168 @@
+<%- include("partials/header", { title: "Seanse" }) %>
+<%- include("partials/sidebar") %>
+
+<h1>Seanse</h1>
+
+<form id="addScreening">
+  <select name="movie_id" required>
+    <% movies.forEach(m => { %>
+      <option value="<%= m._id %>"><%= m.title %></option>
+    <% }) %>
+  </select>
+
+  <select name="hall_id" required>
+    <% halls.forEach(h => { %>
+      <option value="<%= h._id %>"><%= h.name %></option>
+    <% }) %>
+  </select>
+
+  <input type="datetime-local" name="start_at" required />
+  <button>Dodaj seans</button>
+  <span class="msg"></span>
+</form>
+
+<hr />
+
+<ul id="screenings">
+  <% screenings.forEach(s => { 
+       const locked = s.reservationsCount > 0;
+  %>
+    <li data-id="<%= s._id %>" class="<%= locked ? 'locked' : '' %>">
+
+      <select class="movie" <%= locked ? 'disabled' : '' %>>
+        <% movies.forEach(m => { %>
+          <option
+            value="<%= m._id %>"
+            <%= m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
+            <%= m.title %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select class="hall" <%= locked ? 'disabled' : '' %>>
+        <% halls.forEach(h => { %>
+          <option
+            value="<%= h._id %>"
+            <%= h._id.toString() === s.hall_id._id.toString() ? "selected" : "" %>>
+            <%= h.name %>
+          </option>
+        <% }) %>
+      </select>
+
+      <input
+        type="datetime-local"
+        class="start_at"
+        value="<%= new Date(s.start_at).toISOString().slice(0,16) %>"
+        <%= locked ? 'disabled' : '' %>
+      />
+
+      <% if (!locked) { %>
+        <button class="save">Zapisz</button>
+        <button class="delete">Usuń</button>
+      <% } else { %>
+        🔒 <small>(ma rezerwacje)</small>
+      <% } %>
+
+      <span class="msg"></span>
+    </li>
+  <% }) %>
+</ul>
+
+<style>
+  .locked {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.locked select,
+.locked input {
+  cursor: not-allowed;
+}
+.msg { margin-left: 10px; opacity: 0; transition: 0.2s; color: green; }
+.msg.show { opacity: 1; }
+.msg.error { color: red; }
+</style>
+
+<script>
+function showMsg(el, text, error = false) {
+  const msg = el.querySelector(".msg");
+  msg.innerText = text;
+  msg.classList.add("show");
+  msg.classList.toggle("error", error);
+  setTimeout(() => {
+    msg.classList.remove("show", "error");
+    msg.innerText = "";
+  }, 1500);
+}
+
+document.getElementById("addScreening").onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target;
+
+  const res = await fetch("/api/admin/screenings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      movie_id: f.movie_id.value,
+      hall_id: f.hall_id.value,
+      start_at: f.start_at.value
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    showMsg(f, data.error || "Błąd", true);
+    return;
+  }
+
+  showMsg(f, "Dodano");
+  setTimeout(() => location.reload(), 500);
+};
+
+document.querySelectorAll(".save").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+
+    const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        movie_id: li.querySelector(".movie").value,
+        hall_id: li.querySelector(".hall").value,
+        start_at: li.querySelector(".start_at").value
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMsg(li, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(li, "Zapisano");
+  };
+});
+
+document.querySelectorAll(".delete").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+
+    const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      showMsg(li, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(li, "Usunięto");
+    setTimeout(() => li.remove(), 400);
+  };
+});
+</script>
+
+<%- include("partials/footer") %>

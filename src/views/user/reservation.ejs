@@ -1,0 +1,121 @@
+<%- include("partials/header", { title: "Rezerwacja" }) %> <%-
+include("partials/sidebar") %>
+
+<h1>Nowa rezerwacja</h1>
+
+<form id="reservationForm">
+  <!-- SEANS -->
+  <label>Seans</label><br />
+  <select id="screening" required>
+    <option value="">-- wybierz seans --</option>
+    <% screenings.forEach(s => { %>
+    <option value="<%= s._id %>">
+      <%= s.movie_id.title %> | <%= s.hall_id.name %> | <%= new
+      Date(s.start_at).toLocaleString() %>
+    </option>
+    <% }) %>
+  </select>
+
+  <br /><br />
+
+  <!-- MIEJSCE -->
+  <label>Miejsce</label><br />
+  <select id="seat" required>
+    <option>Wybierz seans</option>
+  </select>
+
+  <br /><br />
+
+  <!-- PŁATNOŚĆ -->
+  <label>Metoda płatności</label><br />
+  <select id="paymentSelect">
+    <option value="KARTA">Karta</option>
+    <option value="BLIK">BLIK</option>
+    <option value="PRZELEW">Przelew</option>
+    <option value="GOTÓWKA">Gotówka</option>
+  </select>
+
+  <br /><br />
+
+  <button type="submit">Zarezerwuj</button>
+  <span class="msg"></span>
+</form>
+
+<style>
+  form {
+    max-width: 500px;
+  }
+  select,
+  button {
+    margin-top: 6px;
+  }
+  .msg {
+    margin-left: 10px;
+    opacity: 0;
+    transition: 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+    color: green;
+  }
+  .msg.error {
+    color: red;
+  }
+</style>
+
+<script>
+  const screeningSelect = document.getElementById("screening");
+  const seatSelect = document.getElementById("seat");
+  const msg = document.querySelector(".msg");
+
+  /* ===== POBIERANIE WOLNYCH MIEJSC ===== */
+  screeningSelect.onchange = async () => {
+    seatSelect.innerHTML = "<option>Ładowanie...</option>";
+
+    const res = await fetch(
+      `/api/user/reservations/screenings/${screeningSelect.value}/seats`
+    );
+
+    const seats = await res.json();
+    seatSelect.innerHTML = "";
+
+    seats.forEach((seat) => {
+      const opt = document.createElement("option");
+      opt.value = seat._id;
+      opt.innerText = `Rząd ${seat.row}, miejsce ${seat.seat_number}`;
+      seatSelect.appendChild(opt);
+    });
+  };
+
+  /* ===== UTWÓRZ REZERWACJĘ ===== */
+  document.getElementById("reservationForm").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const res = await fetch("/api/user/reservation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        screening_id: screeningSelect.value,
+        seats_id: seatSelect.value,
+        payment_provider: paymentSelect.value,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.innerText = data.error || "Błąd";
+      msg.classList.add("show", "error");
+      return;
+    }
+
+    msg.innerText = "Rezerwacja utworzona";
+    msg.classList.add("show");
+
+    setTimeout(() => {
+      window.location.href = "/user/dashboard";
+    }, 800);
+  };
+</script>
+
+<%- include("partials/footer") %>

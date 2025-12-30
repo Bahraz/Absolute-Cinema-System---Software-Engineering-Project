@@ -1,0 +1,103 @@
+<%- include("partials/header", { title: "Dashboard" }) %> <%-
+include("partials/sidebar") %>
+<style>
+  .msg {
+    margin-left: 10px;
+    color: green;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .msg.show {
+    opacity: 1;
+  }
+</style>
+
+<h1>Aktorzy</h1>
+
+<form id="addActor">
+  <input name="name" placeholder="Imię" required />
+  <input name="surname" placeholder="Nazwisko" required />
+  <button>Dodaj</button>
+  <span class="msg"></span>
+</form>
+<hr />
+
+<ul id="actors">
+  <% actors.forEach(actor => { %>
+  <li data-id="<%= actor._id %>">
+    <input class="name" value="<%= actor.name %>" />
+    <input class="surname" value="<%= actor.surname %>" />
+    <button class="save">Zapisz</button>
+    <button class="delete">Usuń</button>
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<script>
+  function showMsg(container, text = "Zapisano") {
+    const msg = container.querySelector(".msg");
+    if (!msg) return;
+
+    msg.innerText = text;
+    msg.classList.add("show");
+
+    setTimeout(() => {
+      msg.classList.remove("show");
+      msg.innerText = "";
+    }, 1800);
+  }
+
+  document.getElementById("addActor").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target;
+
+    await fetch("/api/admin/actors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: f.name.value,
+        surname: f.surname.value,
+      }),
+    });
+
+    showMsg(f, "Dodano");
+    f.reset();
+
+    setTimeout(() => location.reload(), 800);
+  };
+
+  document.querySelectorAll(".save").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      await fetch(`/api/admin/actors/${li.dataset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: li.querySelector(".name").value,
+          surname: li.querySelector(".surname").value,
+        }),
+      });
+
+      showMsg(li, "Zapisano");
+    };
+  });
+
+  document.querySelectorAll(".delete").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      await fetch(`/api/admin/actors/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+
+      showMsg(li, "Usunięto");
+      setTimeout(() => li.remove(), 600);
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

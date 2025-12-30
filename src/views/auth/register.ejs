@@ -1,0 +1,48 @@
+<%- include('../partials/header', { title: 'Rejestracja' }) %>
+
+<h1>Rejestracja</h1>
+
+<div class="box">
+  <input id="name" placeholder="Imię">
+  <input id="surname" placeholder="Nazwisko">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Hasło">
+  <button onclick="register()">Zarejestruj</button>
+  <p id="error" class="error"></p>
+</div>
+
+<p>Masz konto? <a href="/login">Zaloguj się</a></p>
+
+<script>
+async function register() {
+  const body = {
+    name: document.getElementById("name").value.trim(),
+    surname: document.getElementById("surname").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    password: document.getElementById("password").value
+  };
+
+  console.log("WYSYŁAM:", body);
+
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("error").innerText = data.error;
+    return;
+  }
+
+  window.location.href = "/login";
+}
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<%- include("partials/header", { title: hall.name }) %> <%-
+include("partials/sidebar") %>
+
+<h1>Sala: <%= hall.name %></h1>
+
+<hr />
+
+<h2>Miejsca</h2>
+
+<form id="addSeat">
+  <input type="number" name="row" placeholder="Rząd" required />
+  <input
+    type="number"
+    name="seat_number"
+    placeholder="Numer miejsca"
+    required
+  />
+  <button>Dodaj miejsce</button>
+  <span class="msg"></span>
+</form>
+
+<hr />
+
+<ul id="seats">
+  <% seats.forEach(seat => { %>
+  <li data-id="<%= seat._id %>">
+    Rząd <%= seat.row %>, miejsce <%= seat.seat_number %>
+    <button class="delete">Usuń</button>
+    <span class="msg"></span>
+  </li>
+  <% }) %>
+</ul>
+
+<style>
+  .msg {
+    margin-left: 10px;
+    color: green;
+    font-size: 0.9em;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+  }
+  .msg.error {
+    color: red;
+  }
+</style>
+
+<script>
+  const hallId = "<%= hall._id %>";
+
+  function showMsg(el, text, error = false) {
+    const msg = el.querySelector(".msg");
+    msg.innerText = text;
+    msg.classList.add("show");
+    msg.classList.toggle("error", error);
+
+    setTimeout(() => {
+      msg.classList.remove("show", "error");
+      msg.innerText = "";
+    }, 1500);
+  }
+
+  /* ===== ADD SEAT ===== */
+  document.getElementById("addSeat").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target;
+
+    const res = await fetch("/api/admin/seats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        hall_id: hallId,
+        row: f.row.value,
+        seat_number: f.seat_number.value,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMsg(f, data.error || "Błąd", true);
+      return;
+    }
+
+    showMsg(f, "Dodano");
+    setTimeout(() => location.reload(), 500);
+  };
+
+  /* ===== DELETE SEAT ===== */
+  document.querySelectorAll(".delete").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+
+      await fetch(`/api/admin/seats/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+
+      showMsg(li, "Usunięto");
+      setTimeout(() => li.remove(), 300);
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,38 @@
+<%- include('../user/partials/header', { title: 'Logowanie' }) %>
+
+<h1>Logowanie</h1>
+
+<div class="box">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Hasło">
+  <button onclick="login()">Zaloguj</button>
+  <p id="error" class="error"></p>
+</div>
+
+<p>Nie masz konta? <a href="/register">Zarejestruj się</a></p>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("error").innerText = data.error;
+    return;
+  }
+
+  window.location.href = data.redirect;
+}
+</script>
+
+</body>
+</html>
