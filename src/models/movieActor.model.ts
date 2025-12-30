@@ -5,10 +5,15 @@ export interface IMovieActor extends Document {
   actor_id: Types.ObjectId;
 }
 
-const MovieActorSchema = new Schema<IMovieActor>({
-  movie_id: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
-  actor_id: { type: Schema.Types.ObjectId, ref: "Actor", required: true },
-});
+const MovieActorSchema = new Schema<IMovieActor>(
+  {
+    movie_id: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
+    actor_id: { type: Schema.Types.ObjectId, ref: "Actor", required: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 MovieActorSchema.index({ movie_id: 1, actor_id: 1 }, { unique: true });
 

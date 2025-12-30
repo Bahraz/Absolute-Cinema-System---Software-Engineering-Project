@@ -20,8 +20,10 @@ export class ReservationRepository {
   }
 
   findByUserId(userId: string) {
-    return Reservation.find({ user_id: userId })
-      .populate("user_id")
+    return Reservation.find({
+      user_id: userId,
+      is_active: true,
+    })
       .populate({
         path: "screening_id",
         populate: [{ path: "movie_id" }, { path: "hall_id" }],

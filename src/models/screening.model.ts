@@ -9,12 +9,17 @@ export interface IScreening extends Document {
   start_at: Date;
 }
 
-const ScreeningSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  movie_id: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
-  hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
-  start_at: { type: Date, required: true },
-});
+const ScreeningSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    movie_id: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
+    hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
+    start_at: { type: Date, required: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Screening = mongoose.model<IScreening>(
   "Screening",

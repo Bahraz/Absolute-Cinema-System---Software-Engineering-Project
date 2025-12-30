@@ -24,21 +24,32 @@ export class UserService {
     return userRepository.softDelete(id);
   }
 
-  async updateUser(
-    userId: string,
-    data: { name: string; surname: string; email: string }
-  ) {
-    const user = await userRepository.findById(userId);
-    if (!user) return null;
-
-    user.name = data.name;
-    user.surname = data.surname;
-    user.email = data.email;
-
-    await user.save(); // 🔥 TEGO BRAKOWAŁO
-
-    return user;
+async updateUser(
+  userId: string,
+  data: {
+    name?: string;
+    surname?: string;
+    email?: string;
   }
+) {
+  const user = await userRepository.findById(userId);
+  if (!user) return null;
+
+  if (data.name !== undefined) {
+    user.name = data.name;
+  }
+
+  if (data.surname !== undefined) {
+    user.surname = data.surname;
+  }
+
+  if (data.email !== undefined) {
+    user.email = data.email;
+  }
+
+  await user.save();
+  return user;
+}
 
   async updateUserPassword(id: string, password: string) {
     return userRepository.updatePassword(id, password);
@@ -47,8 +58,8 @@ export class UserService {
   async createReservation(data: {
     user_id: string;
     screening_id: string;
-    ticket_id?: string;
     seats_id: string;
+    payment_provider: "KARTA" | "BLIK" | "PRZELEW" | "GOTÓWKA";
   }) {
     return reservationService.createReservation(data);
   }

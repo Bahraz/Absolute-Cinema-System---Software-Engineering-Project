@@ -81,7 +81,9 @@
 <select class="screeningSelect">
   <% screenings.forEach(s => { %>
     <option value="<%= s._id %>">
-      <%= s.movie_id.title %> | <%= s.hall_id.name %>
+      <%= s.movie_id ? s.movie_id.title : "❌ brak filmu" %>
+      |
+      <%= s.hall_id ? s.hall_id.name : "❌ brak sali" %>
     </option>
   <% }) %>
 </select>

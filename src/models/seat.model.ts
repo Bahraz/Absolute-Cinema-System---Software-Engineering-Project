@@ -7,11 +7,16 @@ export interface ISeat extends Document {
   seat_number: number;
 }
 
-const SeatSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
-  row: { type: Number, required: true },
-  seat_number: { type: Number, required: true },
-});
+const SeatSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
+    row: { type: Number, required: true },
+    seat_number: { type: Number, required: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Seat = mongoose.model<ISeat>("Seat", SeatSchema);

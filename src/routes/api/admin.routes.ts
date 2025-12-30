@@ -123,6 +123,11 @@ router.get("/halls/:id", authMiddleware, (req, res) =>
   hallController.details(req, res)
 );
 
+router.post("/halls", authMiddleware, (req, res) =>
+  hallController.create(req, res)
+);
+
+router.delete("/halls/:id", authMiddleware, (req,res) => hallController.delete(req,res));
 /* ================= SEATS API ================= */
 
 router.get("/seats/hall/:hallId", authMiddleware, (req, res) =>
@@ -188,13 +193,13 @@ router.get("/reservations/screenings/:screeningId/seats", (req, res) =>
 );
 
 /* ===== EMPLOYEES ===== */
-router.get("/employees", (req, res) => employeesController.show(req, res));
-router.post("employees", (req, res) => employeesController.create(req, res));
+router.get("/employees", (req, res) => adminController.getEmployees(req, res));
+router.post("employees", (req, res) => adminController.addEmployee(req, res));
 router.patch("/employees/:id", (req, res) =>
-  employeesController.update(req, res)
+  adminController.updateEmployeeRole(req, res)
 );
 router.delete("/employees/:id", (req, res) =>
-  employeesController.delete(req, res)
+  adminController.removeEmployee(req, res)
 );
 
 /* ===== USERS ===== */

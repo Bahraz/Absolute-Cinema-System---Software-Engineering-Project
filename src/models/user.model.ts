@@ -35,7 +35,13 @@ const UserSchema: Schema<IUser> = new Schema(
 
     is_active: { type: Boolean, default: true }, // ✅ SOFT DELETE
   },
-  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
+  {
+    timestamps: {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      versionKey: false,
+    },
+  }
 );
 
 // ================= PRE SAVE =================

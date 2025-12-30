@@ -8,7 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // USER
-router.get("/my", reservationController.getMy);
+// router.get("/my", reservationController.getMy);
 router.post("/", reservationController.create);
 router.delete("/:id", reservationController.cancel);
 

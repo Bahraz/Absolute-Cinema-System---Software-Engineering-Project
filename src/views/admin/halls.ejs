@@ -3,14 +3,115 @@
 
 <h1>Sale kinowe</h1>
 
-<ul>
+<hr />
+
+<h2>Lista sal</h2>
+
+<ul id="hallsList">
+  <% if (halls.length === 0) { %>
+    <li>Brak sal</li>
+  <% } %>
+
   <% halls.forEach(h => { %>
-    <li>
+    <li data-id="<%= h._id %>">
       <b><%= h.name %></b>
       —
       <a href="/admin/halls/<%= h._id %>">Miejsca</a>
+      —
+      <button class="delete danger">Usuń</button>
+      <span class="msg"></span>
     </li>
   <% }) %>
 </ul>
+
+<hr />
+
+<h2>Dodaj salę</h2>
+
+<form id="addHall">
+  <input
+    name="name"
+    placeholder="Nazwa sali (np. Sala 1)"
+    required
+  />
+  <button>Dodaj</button>
+  <span class="msg"></span>
+</form>
+
+<style>
+  ul { list-style: none; padding: 0; }
+  li { margin-bottom: 6px; }
+
+  button.danger {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+
+  .msg {
+    margin-left: 6px;
+    opacity: 0;
+    transition: .2s;
+    font-size: .85em;
+  }
+
+  .msg.show { opacity: 1; color: green; }
+  .msg.error { color: red; }
+</style>
+
+<script>
+/* ===== DODAJ SALĘ ===== */
+document.getElementById("addHall").onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target;
+  const msg = f.querySelector(".msg");
+
+  const res = await fetch("/api/admin/halls", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: f.name.value })
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    msg.innerText = data.error || "Błąd";
+    msg.classList.add("show", "error");
+    return;
+  }
+
+  msg.innerText = "Dodano salę";
+  msg.classList.add("show");
+
+  setTimeout(() => location.reload(), 400);
+};
+
+/* ===== USUŃ SALĘ ===== */
+document.querySelectorAll(".delete").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+    const msg = li.querySelector(".msg");
+
+    const res = await fetch(`/api/admin/halls/${li.dataset.id}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      msg.innerText = data.error || "Nie można usunąć";
+      msg.classList.add("show", "error");
+      return;
+    }
+
+    msg.innerText = "Usunięto";
+    msg.classList.add("show");
+
+    setTimeout(() => li.remove(), 400);
+  };
+});
+</script>
 
 <%- include("partials/footer") %>

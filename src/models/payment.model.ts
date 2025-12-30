@@ -6,15 +6,20 @@ export interface IPayment extends Document {
   provider: "KARTA" | "PRZELEW" | "BLIK" | "GOTÓWKA";
 }
 
-const PaymentSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  status: {
-    type: String,
-    enum: ["ZAINICJOWANA", "W TRAKCIE", "OPŁACONA", "NIEUDANA", "ZWRÓCONO"],
-    default: "ZAINICJOWANA",
-    required: true,
+const PaymentSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    status: {
+      type: String,
+      enum: ["ZAINICJOWANA", "W TRAKCIE", "OPŁACONA", "NIEUDANA", "ZWRÓCONO"],
+      default: "ZAINICJOWANA",
+      required: true,
+    },
+    provider: { type: String, enum: ["KARTA", "PRZELEW", "BLIK", "GOTÓWKA"] },
   },
-  provider: { type: String, enum: ["KARTA", "PRZELEW", "BLIK", "GOTÓWKA"] },
-});
+  {
+    versionKey: false,
+  }
+);
 
 export const Payment = mongoose.model<IPayment>("Payment", PaymentSchema);

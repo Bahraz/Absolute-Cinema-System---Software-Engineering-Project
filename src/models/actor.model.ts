@@ -6,10 +6,15 @@ export interface IActor extends Document {
   surname: string;
 }
 
-const ActorSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  name: { type: String, required: true, trim: true },
-  surname: { type: String, required: true, trim: true },
-});
+const ActorSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    name: { type: String, required: true, trim: true },
+    surname: { type: String, required: true, trim: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Actor = mongoose.model<IActor>("Actor", ActorSchema);

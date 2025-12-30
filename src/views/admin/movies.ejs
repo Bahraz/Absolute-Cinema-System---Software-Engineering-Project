@@ -7,17 +7,20 @@
 
 <h2>Lista filmów</h2>
 
-<ul>
+<ul id="moviesList">
   <% if (movies.length === 0) { %>
     <li>Brak filmów</li>
   <% } %>
 
   <% movies.forEach(m => { %>
-    <li>
+    <li data-id="<%= m._id %>">
       <b><%= m.title %></b>
       (<%= m.release_year %>, <%= m.duration %> min)
       —
       <a href="/admin/movies/<%= m._id %>">Szczegóły</a>
+      |
+      <button class="delete danger">Usuń</button>
+      <span class="msg"></span>
     </li>
   <% }) %>
 </ul>
@@ -34,7 +37,28 @@
   <button>Dodaj film</button>
 </form>
 
+<style>
+  .danger {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  .msg {
+    margin-left: 6px;
+    font-size: 0.85em;
+    opacity: 0;
+    transition: .2s;
+  }
+  .msg.show {
+    opacity: 1;
+    color: green;
+  }
+</style>
+
 <script>
+/* ===== DODAWANIE FILMU ===== */
 document.getElementById("addMovie").onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
@@ -52,6 +76,29 @@ document.getElementById("addMovie").onsubmit = async e => {
 
   location.reload();
 };
+
+/* ===== USUWANIE FILMU ===== */
+document.querySelectorAll(".delete").forEach(btn => {
+  btn.onclick = async e => {
+    const li = e.target.closest("li");
+    const msg = li.querySelector(".msg");
+
+    const res = await fetch(`/api/admin/movies/${li.dataset.id}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok) {
+      msg.innerText = "Błąd usuwania";
+      msg.classList.add("show");
+      return;
+    }
+
+    msg.innerText = "Usunięto";
+    msg.classList.add("show");
+
+    setTimeout(() => li.remove(), 400);
+  };
+});
 </script>
 
 <%- include("partials/footer") %>

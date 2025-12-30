@@ -5,9 +5,14 @@ export interface IHall extends Document {
   name: string;
 }
 
-const HallSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  name: { type: String, required: true, trim: true },
-});
+const HallSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    name: { type: String, required: true, trim: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Hall = mongoose.model<IHall>("Hall", HallSchema);

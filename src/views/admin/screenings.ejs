@@ -29,15 +29,15 @@
   %>
     <li data-id="<%= s._id %>" class="<%= locked ? 'locked' : '' %>">
 
-      <select class="movie" <%= locked ? 'disabled' : '' %>>
-        <% movies.forEach(m => { %>
-          <option
-            value="<%= m._id %>"
-            <%= m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
-            <%= m.title %>
-          </option>
-        <% }) %>
-      </select>
+<select class="movie" <%= locked ? 'disabled' : '' %>>
+  <% movies.forEach(m => { %>
+    <option
+      value="<%= m._id %>"
+      <%= s.movie_id && m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
+      <%= m.title %>
+    </option>
+  <% }) %>
+</select>
 
       <select class="hall" <%= locked ? 'disabled' : '' %>>
         <% halls.forEach(h => { %>

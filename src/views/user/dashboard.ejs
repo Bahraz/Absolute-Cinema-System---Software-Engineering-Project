@@ -1,47 +1,44 @@
-<%- include("partials/header", { title: "Dashboard" }) %>
-<%- include("partials/sidebar") %>
+<%- include("partials/header", { title: "Dashboard" }) %> <%-
+include("partials/sidebar") %>
 
 <h1>Nadchodzące seanse</h1>
 
 <ul class="screenings">
   <% screenings.forEach(s => { %>
-    <li class="screening">
+  <li class="screening">
+    <% if (s.movie_id && s.hall_id) { %> 🎬 <b><%= s.movie_id.title %></b>
+    <% } else { %> ⚠️ Brak danych filmu <% } %>
 
-      <div class="movie">
-        🎬 <b><%= s.movie_id.title %></b>
-      </div>
-
-      <div class="details">
-        🏛️ Sala: <%= s.hall_id.name %><br/>
-        🕒 <%= new Date(s.start_at).toLocaleString() %>
-      </div>
-
-    </li>
+    <div class="details">
+      🏛️ Sala: <%= s.hall_id.name %><br />
+      🕒 <%= new Date(s.start_at).toLocaleString() %>
+    </div>
+  </li>
   <% }) %>
 </ul>
 
 <style>
-.screenings {
-  list-style: none;
-  padding: 0;
-  max-width: 700px;
-}
+  .screenings {
+    list-style: none;
+    padding: 0;
+    max-width: 700px;
+  }
 
-.screening {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 10px;
-}
+  .screening {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
 
-.movie {
-  font-size: 1.1em;
-}
+  .movie {
+    font-size: 1.1em;
+  }
 
-.details {
-  color: #555;
-  margin-top: 4px;
-}
+  .details {
+    color: #555;
+    margin-top: 4px;
+  }
 </style>
 
 <%- include("partials/footer") %>

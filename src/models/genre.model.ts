@@ -5,9 +5,14 @@ export interface IGenre extends Document {
   name: string;
 }
 
-const GenreSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  name: { type: String, required: true, trim: true },
-});
+const GenreSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    name: { type: String, required: true, trim: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Genre = mongoose.model<IGenre>("Genre", GenreSchema);

@@ -11,6 +11,17 @@ export class ReservationController {
       screenings,
     });
   }
+
+  // ========================
+  // USER VIEW – MOJE REZERWACJE
+  // ========================
+  async myReservationPanel(req: Request, res: Response) {
+    const reservations = await reservationRepository.findByUserId(req.user.id);
+
+    res.render("user/my-reservations", {
+      reservations,
+    });
+  }
   // ========================
   // ADMIN VIEW
   // ========================
@@ -27,7 +38,7 @@ export class ReservationController {
   // ========================
   // USER – MOJE REZERWACJE
   // ========================
-  async getMy(req: Request, res: Response) {
+  async getMyReservation(req: Request, res: Response) {
     try {
       const reservations = await reservationRepository.findByUserId(
         req.user.id
@@ -160,6 +171,17 @@ export class ReservationController {
       res.status(500).json({
         error: "Błąd pobierania wolnych miejsc",
       });
+    }
+  }
+  async getPrice(req: Request, res: Response) {
+    try {
+      const { screeningId } = req.params;
+
+      const price = await reservationService.calculatePrice(screeningId);
+
+      res.json({ price });
+    } catch {
+      res.status(500).json({ error: "Błąd obliczania ceny" });
     }
   }
 }

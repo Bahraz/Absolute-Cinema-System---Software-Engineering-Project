@@ -29,7 +29,7 @@ export class AdminController {
         movieRepository.count(),
         screeningRepository.count(),
         reservationRepository.count(),
-        screeningRepository.findUpcoming(5),
+        screeningRepository.findUpcoming(),
       ]);
 
       res.status(200).json({

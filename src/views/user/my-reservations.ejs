@@ -1,0 +1,129 @@
+<%- include("partials/header", { title: "Moje rezerwacje" }) %> <%-
+include("partials/sidebar") %>
+
+<h1>Moje rezerwacje</h1>
+
+<ul class="reservations">
+  <% if (!reservations || reservations.length === 0) { %>
+  <li>Brak aktywnych rezerwacji</li>
+  <% } %> <% reservations.forEach(r => { %>
+  <li class="reservation" data-id="<%= r._id %>">
+    <!-- ================= MAIN ================= -->
+    <div class="main">
+      🎟️ <b>ID:</b> <%= r._id %><br />
+
+      🎬 <b>Film:</b> <%= r.screening_id?.movie_id?.title || "—" %><br />
+
+      🕒 <b>Seans:</b> <%= r.screening_id?.start_at ? new
+      Date(r.screening_id.start_at).toLocaleString() : "—" %><br />
+
+      🏛️ <b>Sala:</b> <%= r.screening_id?.hall_id?.name || "—" %><br />
+
+      💺 <b>Miejsce:</b>
+      <% if (r.seats_id) { %> Rząd <%= r.seats_id.row %>, miejsce <%=
+      r.seats_id.seat_number %> <% } else { %> — <% } %>
+    </div>
+
+    <!-- ================= TICKET ================= -->
+    <div class="ticket">
+      <b>Bilet</b><br />
+      <% if (r.ticket_id) { %> ID: <%= r.ticket_id._id %><br />
+      Cena: <%= r.ticket_id.amount %> zł<br />
+      Status: <%= r.ticket_id.status %> <% } else { %> Brak biletu <% } %>
+    </div>
+
+    <!-- ================= PAYMENT ================= -->
+    <div class="payment">
+      <b>Płatność</b><br />
+      <% if (r.ticket_id && r.ticket_id.payment_id) { %> ID: <%=
+      r.ticket_id.payment_id._id %><br />
+      Provider: <%= r.ticket_id.payment_id.provider %><br />
+      Status: <%= r.ticket_id.payment_id.status %> <% } else { %> Brak płatności
+      <% } %>
+    </div>
+
+    <!-- ================= ACTIONS ================= -->
+    <div class="actions">
+      <button class="cancel danger">Anuluj</button>
+      <span class="msg"></span>
+    </div>
+  </li>
+  <% }) %>
+</ul>
+
+<style>
+  .reservations {
+    list-style: none;
+    padding: 0;
+    max-width: 950px;
+  }
+
+  .reservation {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+  }
+
+  .ticket,
+  .payment {
+    background: #f9f9f9;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+  }
+
+  button.danger {
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+
+  .msg {
+    margin-left: 6px;
+    opacity: 0;
+    transition: 0.2s;
+    font-size: 0.85em;
+  }
+
+  .msg.show {
+    opacity: 1;
+    color: green;
+  }
+</style>
+
+<script>
+  document.querySelectorAll(".cancel").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest(".reservation");
+      const msg = li.querySelector(".msg");
+
+      const res = await fetch(`/api/user/reservations/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        msg.innerText = "Błąd";
+        msg.classList.add("show");
+        return;
+      }
+
+      msg.innerText = "Anulowano";
+      msg.classList.add("show");
+
+      setTimeout(() => li.remove(), 500);
+    };
+  });
+</script>
+
+<%- include("partials/footer") %>

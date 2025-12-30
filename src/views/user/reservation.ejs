@@ -8,12 +8,13 @@ include("partials/sidebar") %>
   <label>Seans</label><br />
   <select id="screening" required>
     <option value="">-- wybierz seans --</option>
-    <% screenings.forEach(s => { %>
+
+    <% screenings.forEach(s => { %> <% if (s.movie_id && s.hall_id) { %>
     <option value="<%= s._id %>">
       <%= s.movie_id.title %> | <%= s.hall_id.name %> | <%= new
       Date(s.start_at).toLocaleString() %>
     </option>
-    <% }) %>
+    <% } %> <% }) %>
   </select>
 
   <br /><br />
@@ -34,6 +35,10 @@ include("partials/sidebar") %>
     <option value="PRZELEW">Przelew</option>
     <option value="GOTÓWKA">Gotówka</option>
   </select>
+
+  <div id="priceBox" style="margin-top: 8px; display: none">
+    💰 Cena biletu: <b><span id="priceValue"></span> zł</b>
+  </div>
 
   <br /><br />
 
@@ -85,6 +90,36 @@ include("partials/sidebar") %>
       opt.innerText = `Rząd ${seat.row}, miejsce ${seat.seat_number}`;
       seatSelect.appendChild(opt);
     });
+  };
+
+  const priceBox = document.getElementById("priceBox");
+  const priceValue = document.getElementById("priceValue");
+
+  screeningSelect.onchange = async () => {
+    /* ===== MIEJSCA ===== */
+    seatSelect.innerHTML = "<option>Ładowanie...</option>";
+
+    const seatsRes = await fetch(
+      `/api/user/reservations/screenings/${screeningSelect.value}/seats`
+    );
+    const seats = await seatsRes.json();
+
+    seatSelect.innerHTML = "";
+    seats.forEach((seat) => {
+      const opt = document.createElement("option");
+      opt.value = seat._id;
+      opt.innerText = `Rząd ${seat.row}, miejsce ${seat.seat_number}`;
+      seatSelect.appendChild(opt);
+    });
+
+    /* ===== CENA ===== */
+    const priceRes = await fetch(
+      `/api/user/reservations/screenings/${screeningSelect.value}/price`
+    );
+    const priceData = await priceRes.json();
+
+    priceValue.innerText = priceData.price;
+    priceBox.style.display = "block";
   };
 
   /* ===== UTWÓRZ REZERWACJĘ ===== */

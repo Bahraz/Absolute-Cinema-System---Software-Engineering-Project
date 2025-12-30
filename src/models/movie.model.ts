@@ -8,12 +8,17 @@ export interface IMovie extends Document {
   description: string;
 }
 
-const MovieSchema: Schema = new Schema({
-  _id: { type: Schema.Types.ObjectId, auto: true },
-  title: { type: String, required: true, trim: true },
-  duration: { type: Number, required: true },
-  release_year: { type: Number, required: true },
-  description: { type: String, required: true}
-});
+const MovieSchema: Schema = new Schema(
+  {
+    _id: { type: Schema.Types.ObjectId, auto: true },
+    title: { type: String, required: true, trim: true },
+    duration: { type: Number, required: true },
+    release_year: { type: Number, required: true },
+    description: { type: String, required: true },
+  },
+  {
+    versionKey: false,
+  }
+);
 
 export const Movie = mongoose.model<IMovie>("Movie", MovieSchema);
