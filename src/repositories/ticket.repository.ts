@@ -18,7 +18,7 @@ export class TicketRepository {
   create(data: { payment_id: string; amount: number; expires_at: Date }) {
     return Ticket.create({
       ...data,
-      status: "WYGASŁY",
+      status: "AKTYWNY",
     });
   }
 

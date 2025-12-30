@@ -102,11 +102,11 @@ export class ReservationController {
 
   async update(req: Request, res: Response) {
     try {
-      const { screening_id } = req.body;
+      const { screening_id, seats_id } = req.body;
 
-      if (!screening_id) {
+      if (!screening_id || !seats_id) {
         return res.status(400).json({
-          error: "screening_id jest wymagane",
+          error: "screening_id oraz seats_id są wymagane",
         });
       }
 
@@ -120,26 +120,29 @@ export class ReservationController {
       // 🔒 sprawdzamy kolizję miejsca w nowym seansie
       const existing = await reservationRepository.findByScreeningAndSeat(
         screening_id,
-        reservation.seats_id.toString()
+        seats_id
       );
 
-      if (existing) {
+      // ⚠️ wykluczamy aktualną rezerwację
+      if (existing && existing._id.toString() !== reservation._id.toString()) {
         return res.status(409).json({
           error: "To miejsce jest już zajęte w wybranym seansie",
         });
       }
 
       reservation.screening_id = screening_id;
+      reservation.seats_id = seats_id;
+
       await reservation.save();
 
       res.json(reservation);
-    } catch {
+    } catch (err) {
+      console.error("UPDATE RESERVATION ERROR:", err);
       res.status(500).json({
         error: "Błąd edycji rezerwacji",
       });
     }
   }
-
   // ========================
   // ANULUJ REZERWACJĘ
   // ========================

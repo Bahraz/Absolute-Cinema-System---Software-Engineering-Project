@@ -82,65 +82,6 @@ export class UserController {
       });
     }
   }
-
-  async getMyReservations(req: Request, res: Response) {
-    try {
-      const reservations = await userService.getMyReservations(req.user.id);
-      res.status(200).json(reservations);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania rezerwacji",
-      });
-    }
-  }
-
-  async createReservation(req: Request, res: Response) {
-    try {
-      const { screening_id, seats_id, payment_provider } = req.body;
-
-      if (!screening_id || !seats_id) {
-        return res.status(400).json({
-          error: "screening_id oraz seats_id są wymagane",
-        });
-      }
-
-      const reservation = await userService.createReservation({
-        user_id: req.user.id,
-        screening_id,
-        seats_id,
-        payment_provider,
-      });
-
-      res.status(201).json(reservation);
-    } catch (err: any) {
-      if (err instanceof Error && err.message === "SEAT_ALREADY_RESERVED") {
-        return res.status(409).json({
-          error: "Wybrane miejsce jest już zajęte",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd tworzenia rezerwacji",
-      });
-    }
-  }
-
-  async cancelReservation(req: Request, res: Response) {
-    try {
-      await userService.cancelReservation(req.params.id);
-      res.sendStatus(204);
-    } catch (err) {
-      if (err instanceof Error && err.message === "RESERVATION_NOT_FOUND") {
-        return res.status(404).json({
-          error: "Nie znaleziono rezerwacji",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd anulowania rezerwacji",
-      });
-    }
-  }
   async toggleActive(req: Request, res: Response) {
     const user = await userService.toggleUserActive(req.params.id);
 
@@ -159,7 +100,6 @@ export class UserController {
 
   async updateProfile(req: Request, res: Response) {
     const { name, surname, email } = req.body;
-
     if (!name && !surname && !email) {
       return res.status(400).json({
         error: "Brak danych do aktualizacji",
@@ -185,7 +125,8 @@ export class UserController {
     }
 
     await userService.updateUserPassword(req.user.id, password);
-    res.sendStatus(204);
+
+    res.json({ message: "Hasło zmienione" }); // ✅
   }
 }
 

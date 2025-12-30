@@ -131,6 +131,37 @@ export class AdminController {
       res.status(500).json({ error: "Błąd usuwania pracownika" });
     }
   }
+
+  async resetUserPassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { password } = req.body;
+
+      if (!password || password.length < 6) {
+        return res.status(400).json({
+          error: "Hasło musi mieć min. 6 znaków",
+        });
+      }
+
+      const user = await userRepository.findById(id);
+      if (!user) {
+        return res.status(404).json({
+          error: "Użytkownik nie istnieje",
+        });
+      }
+
+      await userRepository.updatePassword(id, password);
+
+      res.json({
+        message: "Hasło użytkownika zostało zresetowane",
+      });
+    } catch (err) {
+      console.error("RESET PASSWORD ERROR:", err);
+      res.status(500).json({
+        error: "Błąd resetowania hasła",
+      });
+    }
+  }
 }
 
 export const adminController = new AdminController();

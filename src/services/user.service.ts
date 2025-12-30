@@ -32,7 +32,7 @@ async updateUser(
     email?: string;
   }
 ) {
-  const user = await userRepository.findById(userId);
+  const user = await userRepository.findByIdForUpdate(userId);
   if (!user) return null;
 
   if (data.name !== undefined) {

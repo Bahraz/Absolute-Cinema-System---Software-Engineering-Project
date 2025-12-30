@@ -1,23 +1,23 @@
-<%- include("partials/header", { title: "Panel użytkownika" }) %>
-<%- include("partials/sidebar") %>
+<%- include("partials/header", { title: "Panel użytkownika" }) %> <%-
+include("partials/sidebar") %>
 
 <h1>Mój profil</h1>
 
 <div class="profile">
-  <label>Imię</label><br/>
-  <input id="name" value="<%= user.name %>" /><br/>
+  <label>Imię</label><br />
+  <input id="name" value="<%= user.name %>" /><br />
 
-  <label>Nazwisko</label><br/>
-  <input id="surname" value="<%= user.surname || "" %>" /><br/>
+  <label>Nazwisko</label><br />
+  <input id="surname" value="<%= user.surname || "" %>" /><br />
 
-  <label>Email</label><br/>
-  <input id="email" value="<%= user.email %>" /><br/>
+  <label>Email</label><br />
+  <input id="email" value="<%= user.email %>" /><br />
 
   <button id="saveProfile">Zapisz dane</button>
   <span class="msg" id="profileMsg"></span>
 </div>
 
-<hr/>
+<hr />
 
 <h2>Zmień hasło</h2>
 
@@ -31,63 +31,88 @@
   <span class="msg" id="passwordMsg"></span>
 </div>
 
-<hr/>
+<hr />
 
 <style>
-.profile, .password { max-width: 400px; }
-input, button { margin-top: 6px; }
-.msg { margin-left: 10px; opacity: 0; transition: .2s; }
-.msg.show { opacity: 1; color: green; }
-.msg.error { color: red; }
-.reservations { list-style: none; padding: 0; }
-.reservations li { margin-bottom: 10px; }
+  .profile,
+  .password {
+    max-width: 400px;
+  }
+  input,
+  button {
+    margin-top: 6px;
+  }
+  .msg {
+    margin-left: 10px;
+    opacity: 0;
+    transition: 0.2s;
+  }
+  .msg.show {
+    opacity: 1;
+    color: green;
+  }
+  .msg.error {
+    color: red;
+  }
+  .reservations {
+    list-style: none;
+    padding: 0;
+  }
+  .reservations li {
+    margin-bottom: 10px;
+  }
 </style>
 
 <script>
-const showMsg = (el, text, error = false) => {
-  el.innerText = text;
-  el.classList.add("show");
-  el.classList.toggle("error", error);
-  setTimeout(() => el.classList.remove("show", "error"), 1500);
-};
+  const showMsg = (el, text, error = false) => {
+    el.innerText = text;
+    el.classList.add("show");
+    el.classList.toggle("error", error);
+    setTimeout(() => el.classList.remove("show", "error"), 1500);
+  };
 
-/* ===== UPDATE PROFILE ===== */
-document.getElementById("saveProfile").onclick = async () => {
-  const res = await fetch("/api/user/profile", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: name.value,
-      surname: surname.value,
-      email: email.value,
-    }),
-  });
+  /* ===== UPDATE PROFILE ===== */
+  document.getElementById("saveProfile").onclick = async () => {
+    const nameInput = document.getElementById("name");
+    const surnameInput = document.getElementById("surname");
+    const emailInput = document.getElementById("email");
 
-  const data = await res.json();
-  showMsg(
-    document.getElementById("profileMsg"),
-    res.ok ? "Zapisano" : data.error,
-    !res.ok
-  );
-};
+    const res = await fetch("/api/user/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: nameInput.value,
+        surname: surnameInput.value,
+        email: emailInput.value,
+      }),
+    });
 
-/* ===== UPDATE PASSWORD ===== */
-document.getElementById("savePassword").onclick = async () => {
-  const res = await fetch("/api/user/password", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: password.value }),
-  });
-
-  if (!res.ok) {
     const data = await res.json();
-    showMsg(passwordMsg, data.error, true);
-    return;
-  }
 
-  password.value = "";
-  showMsg(passwordMsg, "Hasło zmienione");
-};
+    showMsg(
+      document.getElementById("profileMsg"),
+      res.ok ? "Zapisano" : data.error,
+      !res.ok
+    );
+  };
+
+  /* ===== UPDATE PASSWORD ===== */
+  document.getElementById("savePassword").onclick = async () => {
+    const res = await fetch("/api/user/password", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password.value }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      showMsg(passwordMsg, data.error, true);
+      return;
+    }
+
+    password.value = "";
+    showMsg(passwordMsg, "Hasło zmienione");
+  };
 </script>
 
 <%- include("partials/footer") %>

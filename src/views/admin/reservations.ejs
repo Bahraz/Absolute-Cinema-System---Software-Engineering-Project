@@ -13,7 +13,7 @@
           🎬 <b><%= r.screening_id.movie_id.title %></b>
         </div>
         <div class="details">
-          🏛️ Sala: <%= r.screening_id.hall_id.name %> |
+          🏛️ <%= r.screening_id.hall_id.name %> |
           🕒 <%= new Date(r.screening_id.start_at).toLocaleString() %>
         </div>
       </div>
@@ -28,6 +28,8 @@
           <div><%= r.user_id.email %></div>
           <div class="muted">Rezerwacja ID: <%= r._id %></div>
         </div>
+
+        
 
         <!-- SEAT -->
         <div class="block">
@@ -182,8 +184,6 @@
 }
 </style>
 
-<%- include("partials/footer") %>
-
 
 <script>
 function showMsg(el, text, error = false) {
@@ -226,8 +226,8 @@ document.querySelectorAll(".screeningSelect").forEach(select => {
 /* ===== UPDATE PAYMENT ===== */
 document.querySelectorAll(".savePayment").forEach(btn => {
   btn.onclick = async e => {
-    const li = e.target.closest("li");
-    const select = li.querySelector(".paymentStatus");
+    const card = e.target.closest(".reservation-card"); // ✅
+    const select = card.querySelector(".paymentStatus");
     const status = select.value;
     const paymentId = select.dataset.paymentId;
 
@@ -243,51 +243,55 @@ document.querySelectorAll(".savePayment").forEach(btn => {
     const data = await res.json();
 
     if (!res.ok) {
-      showMsg(li, data.error || "Błąd", true);
+      showMsg(card, data.error || "Błąd", true);
       return;
     }
 
-    showMsg(li, "Zmieniono status płatności");
+    showMsg(card, "Zmieniono status płatności");
   };
 });
 
 /* ===== UPDATE RESERVATION (SCREENING) ===== */
 document.querySelectorAll(".saveReservation").forEach(btn => {
   btn.onclick = async e => {
-    const li = e.target.closest("li");
-    const screeningId = li.querySelector(".screeningSelect").value;
+    const card = e.target.closest(".reservation-card"); // ✅
+    const screeningId = card.querySelector(".screeningSelect").value;
+    const seatId = card.querySelector(".seatSelect").value;
 
     const res = await fetch(
-      `/api/admin/reservations/${li.dataset.id}`,
+      `/api/admin/reservations/${card.dataset.id}`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ screening_id: screeningId })
+        body: JSON.stringify({
+          screening_id: screeningId,
+          seats_id: seatId
+        })
       }
     );
 
     const data = await res.json();
 
     if (!res.ok) {
-      showMsg(li, data.error || "Błąd", true);
+      showMsg(card, data.error || "Błąd", true);
       return;
     }
 
-    showMsg(li, "Zmieniono seans");
+    showMsg(card, "Zmieniono seans");
   };
 });
 
 /* ===== DELETE RESERVATION ===== */
 document.querySelectorAll(".deleteReservation").forEach(btn => {
   btn.onclick = async e => {
-    const li = e.target.closest("li");
+    const card = e.target.closest(".reservation-card"); // ✅
 
-    await fetch(`/api/admin/reservations/${li.dataset.id}`, {
+    await fetch(`/api/admin/reservations/${card.dataset.id}`, {
       method: "DELETE"
     });
 
-    showMsg(li, "Usunięto");
-    setTimeout(() => li.remove(), 400);
+    showMsg(card, "Usunięto");
+    setTimeout(() => card.remove(), 400);
   };
 });
 </script>
