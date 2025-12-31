@@ -1,46 +1,43 @@
 import { Router } from "express";
 import { userController } from "@controllers/user.controller";
+import { reservationController } from "@controllers/reservation.controller";
 import { authMiddleware } from "@middlewares/auth.middleware";
 import { userOnly } from "@middlewares/user.middleware";
-import { reservationController } from "@controllers/reservation.controller";
 
 const router = Router();
 
+/* ================= GLOBAL MIDDLEWARE ================= */
 router.use(authMiddleware, userOnly);
 
+/* ================= USER PROFILE ================= */
 router.get("/profile", userController.getProfile);
+router.patch("/profile", userController.updateProfile);
+router.patch("/password", userController.updatePassword);
+
+/* ================= SCREENINGS ================= */
 router.get("/screenings", userController.getScreenings);
-// router.get("/reservations", userController.getMyReservations);
-// router.post("/reservations", userController.createReservation);
+
+/* ================= RESERVATIONS ================= */
 
 // moje rezerwacje
-router.get("/reservation", (req, res) =>
-  reservationController.getMyReservation(req, res)
-);
+router.get("/reservation", reservationController.getMyReservation);
 
 // utwórz rezerwację
-router.post("/reservation", (req, res) =>
-  reservationController.create(req, res)
-);
+router.post("/reservation", reservationController.create);
 
 // anuluj rezerwację
-router.delete("/reservations/:id", (req, res) =>
-  reservationController.cancel(req, res)
+router.delete("/reservations/:id", reservationController.cancel);
+
+// wolne miejsca
+router.get(
+  "/reservations/screenings/:screeningId/seats",
+  reservationController.getAvailableSeats
 );
 
-router.get("/reservations/screenings/:screeningId/seats", (req, res) =>
-  reservationController.getAvailableSeats(req, res)
-);
-
+// cena
 router.get(
   "/reservations/screenings/:screeningId/price",
   reservationController.getPrice
-);
-
-router.patch("/profile", (req, res) => userController.updateProfile(req, res));
-
-router.patch("/password", (req, res) =>
-  userController.updatePassword(req, res)
 );
 
 export default router;

@@ -12,24 +12,20 @@ export class ScreeningRepository {
     return Screening.findById(id).populate("movie_id").populate("hall_id");
   }
 
-  findByHallAndTime(hallId: string, start: Date, end: Date) {
+  findByHallAndTime(hallId: string, start: string, end: string) {
     return Screening.findOne({
       hall_id: hallId,
       start_at: { $gte: start, $lt: end },
     });
   }
 
-  create(data: { movie_id: string; hall_id: string; start_at: Date }) {
+  create(data: { movie_id: string; hall_id: string; start_at: string }) {
     return Screening.create(data);
   }
 
   update(
     id: string,
-    data: {
-      movie_id: string;
-      hall_id: string;
-      start_at: Date;
-    }
+    data: { movie_id: string; hall_id: string; start_at: string }
   ) {
     return Screening.findByIdAndUpdate(id, data, {
       new: true,
@@ -40,16 +36,13 @@ export class ScreeningRepository {
   delete(id: string) {
     return Screening.findByIdAndDelete(id);
   }
-  count() {
-    return Screening.countDocuments();
-  }
 
   findUpcoming() {
-    return Screening.find({ start_at: { $gte: new Date() } })
+    const now = new Date().toISOString().slice(0, 16);
+    return Screening.find({ start_at: { $gte: now } })
       .populate("movie_id")
       .populate("hall_id")
-      .sort({ start_at: 1 })
-      // .limit(limit);
+      .sort({ start_at: 1 });
   }
 
   async findAllWithReservationsCount() {
@@ -57,20 +50,17 @@ export class ScreeningRepository {
       .populate("movie_id")
       .populate("hall_id");
 
-    const result = await Promise.all(
-      screenings.map(async (s) => {
-        const reservationsCount = await Reservation.countDocuments({
+    return Promise.all(
+      screenings.map(async (s) => ({
+        ...s.toObject(),
+        reservationsCount: await Reservation.countDocuments({
           screening_id: s._id,
-        });
-
-        return {
-          ...s.toObject(),
-          reservationsCount,
-        };
-      })
+        }),
+      }))
     );
-
-    return result;
+  }
+  count() {
+    return Screening.countDocuments();
   }
 }
 

@@ -17,7 +17,7 @@ include("partials/sidebar") %>
       🕒 <b>Seans:</b> <%= r.screening_id?.start_at ? new
       Date(r.screening_id.start_at).toLocaleString() : "—" %><br />
 
-      🏛️ <b>Sala:</b> <%= r.screening_id?.hall_id?.name || "—" %><br />
+      🏛️ <%= r.screening_id?.hall_id?.name || "—" %><br />
 
       💺 <b>Miejsce:</b>
       <% if (r.seats_id) { %> Rząd <%= r.seats_id.row %>, miejsce <%=

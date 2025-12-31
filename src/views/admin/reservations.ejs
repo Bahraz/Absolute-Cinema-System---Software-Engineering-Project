@@ -5,105 +5,125 @@
 
 <div class="reservations">
   <% reservations.forEach(r => { %>
-    <div class="reservation-card" data-id="<%= r._id %>">
 
-      <!-- ===== HEADER ===== -->
-      <div class="header">
-        <div class="movie">
-          🎬 <b><%= r.screening_id.movie_id.title %></b>
-        </div>
-        <div class="details">
-          🏛️ <%= r.screening_id.hall_id.name %> |
-          🕒 <%= new Date(r.screening_id.start_at).toLocaleString() %>
-        </div>
+  <div class="reservation-card" data-id="<%= r._id %>">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+      <div class="movie">
+        🎬 <b><%= r.screening_id.movie_id.title %></b>
+      </div>
+      <div class="details">
+        🏛️ <%= r.screening_id.hall_id.name %> |
+        🕒 <%= r.screening_id.start_at %>
+      </div>
+    </div>
+
+    <!-- ===== BODY ===== -->
+    <div class="body">
+
+      <!-- USER -->
+      <div class="block">
+        <h4>Użytkownik</h4>
+        <div><b><%= r.user_id.name %> <%= r.user_id.surname %></b></div>
+        <div><%= r.user_id.email %></div>
+        <div class="muted">Rezerwacja ID: <%= r._id %></div>
       </div>
 
-      <!-- ===== BODY ===== -->
-      <div class="body">
-
-        <!-- USER -->
-        <div class="block">
-          <h4>Użytkownik</h4>
-          <div><b><%= r.user_id.name %> <%= r.user_id.surname %></b></div>
-          <div><%= r.user_id.email %></div>
-          <div class="muted">Rezerwacja ID: <%= r._id %></div>
-        </div>
-
-        
-
-        <!-- SEAT -->
-        <div class="block">
-          <h4>Miejsce</h4>
-          Rząd <b><%= r.seats_id.row %></b>,
-          miejsce <b><%= r.seats_id.seat_number %></b>
-        </div>
-
-        <!-- TICKET -->
-        <div class="block">
-          <h4>Bilet</h4>
-          <% if (r.ticket_id) { %>
-            ID: <%= r.ticket_id._id %><br/>
-            Kwota: <b><%= r.ticket_id.amount %> zł</b><br/>
-            Status: <%= r.ticket_id.status %>
-          <% } else { %>
-            Brak biletu
-          <% } %>
-        </div>
-
-        <!-- PAYMENT -->
-        <div class="block">
-          <h4>Płatność</h4>
-          <% if (r.ticket_id?.payment_id) { %>
-            ID: <%= r.ticket_id.payment_id._id %><br/>
-
-            <select
-              class="paymentStatus"
-              data-payment-id="<%= r.ticket_id.payment_id._id %>">
-              <% ["ZAINICJOWANA","W TRAKCIE","OPŁACONA","NIEUDANA","ZWRÓCONO"].forEach(s => { %>
-                <option
-                  value="<%= s %>"
-                  <%= s === r.ticket_id.payment_id.status ? "selected" : "" %>>
-                  <%= s %>
-                </option>
-              <% }) %>
-            </select>
-
-            <button class="savePayment">Zapisz</button>
-          <% } else { %>
-            Brak płatności
-          <% } %>
-        </div>
-
+      <!-- SEAT -->
+      <div class="block">
+        <h4>Miejsce</h4>
+        Rząd <b><%= r.seats_id.row %></b>,
+        miejsce <b><%= r.seats_id.seat_number %></b>
       </div>
 
-      <!-- ===== FOOTER ===== -->
-      <div class="footer">
-        <div>
-<label>Zmień seans:</label>
-<select class="screeningSelect">
-  <% screenings.forEach(s => { %>
-    <option value="<%= s._id %>">
-      <%= s.movie_id ? s.movie_id.title : "❌ brak filmu" %>
-      |
-      <%= s.hall_id ? s.hall_id.name : "❌ brak sali" %>
-    </option>
-  <% }) %>
-</select>
+      <!-- TICKET -->
+      <div class="block">
+        <h4>Bilet</h4>
+        <% if (r.ticket_id) { %>
+          ID: <%= r.ticket_id._id %><br/>
+          Kwota: <b><%= r.ticket_id.amount %> zł</b><br/>
+          Status biletu:
+          <b class="ticket <%= r.ticket_id.status %>">
+            <%= r.ticket_id.status %>
+          </b>
+        <% } else { %>
+          Brak biletu
+        <% } %>
+      </div>
 
-<label>Miejsce:</label>
-<select class="seatSelect">
-  <option>Wybierz seans</option>
-</select>
-          <button class="saveReservation">Zapisz seans</button>
-        </div>
+      <!-- PAYMENT -->
+      <div class="block">
+<h4>Płatność</h4>
+  <% if (r.ticket_id?.payment_id) { 
+    const currentStatus = r.ticket_id.payment_id.status;
 
-        <div class="actions">
-          <button class="deleteReservation danger">Usuń rezerwację</button>
-          <span class="msg"></span>
-        </div>
+    const ALLOWED_TRANSITIONS = {
+      "ZAINICJOWANA": ["W TRAKCIE", "NIEUDANA"],
+      "W TRAKCIE": ["OPŁACONA", "NIEUDANA"],
+      "OPŁACONA": ["ZWRÓCONO"],
+      "NIEUDANA": [],
+      "ZWRÓCONO": []
+    };
+
+    const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+  %>
+
+    ID: <%= r.ticket_id.payment_id._id %><br/>
+
+    <select
+      class="paymentStatus"
+      data-payment-id="<%= r.ticket_id.payment_id._id %>">
+
+      <!-- aktualny status zawsze widoczny -->
+      <option value="<%= currentStatus %>" selected>
+        <%= currentStatus %>
+      </option>
+
+      <% allowed.forEach(s => { %>
+        <option value="<%= s %>"><%= s %></option>
+      <% }) %>
+    </select>
+
+    <button class="savePayment" <%= allowed.length === 0 ? "disabled" : "" %>>
+      Zapisz
+    </button>
+
+  <% } else { %>
+    Brak płatności
+  <% } %>
       </div>
 
     </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer">
+      <div>
+        <label>Zmień seans:</label>
+        <select class="screeningSelect">
+          <% screenings.forEach(s => { %>
+            <option value="<%= s._id %>">
+              <%= s.movie_id?.title || "❌ brak filmu" %> |
+              <%= s.hall_id?.name || "❌ brak sali" %>
+            </option>
+          <% }) %>
+        </select>
+
+        <label>Miejsce:</label>
+        <select class="seatSelect">
+          <option>Wybierz seans</option>
+        </select>
+
+        <button class="saveReservation">Zapisz seans</button>
+      </div>
+
+      <div class="actions">
+        <button class="deleteReservation danger">Usuń rezerwację</button>
+        <span class="msg"></span>
+      </div>
+    </div>
+
+  </div>
   <% }) %>
 </div>
 
@@ -127,15 +147,6 @@
   margin-bottom: 10px;
 }
 
-.header .movie {
-  font-size: 1.1em;
-}
-
-.header .details {
-  font-size: 0.9em;
-  color: #555;
-}
-
 .body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -153,22 +164,10 @@
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.danger {
-  background: #c0392b;
-  color: #fff;
-  border: none;
-  padding: 6px 10px;
-  cursor: pointer;
-}
+.ticket.AKTYWNY { color: green; }
+.ticket.NIEAKTYWNY { color: orange; }
 
 .msg {
   opacity: 0;
@@ -182,8 +181,15 @@
   color: #888;
   font-size: 0.85em;
 }
-</style>
 
+.danger {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+</style>
 
 <script>
 function showMsg(el, text, error = false) {
@@ -198,21 +204,24 @@ function showMsg(el, text, error = false) {
   }, 1500);
 }
 
+/* LOAD SEATS */
 document.querySelectorAll(".screeningSelect").forEach(select => {
   select.onchange = async e => {
-    const li = e.target.closest(".reservation-card");
-    const seatSelect = li.querySelector(".seatSelect");
+    const card = e.target.closest(".reservation-card");
+    const seatSelect = card.querySelector(".seatSelect");
     const screeningId = e.target.value;
 
     seatSelect.innerHTML = "<option>Ładowanie...</option>";
 
-    const res = await fetch(
-      `/api/admin/reservations/screenings/${screeningId}/seats`
-    );
-
+    const res = await fetch(`/api/admin/reservations/screenings/${screeningId}/seats`);
     const seats = await res.json();
 
     seatSelect.innerHTML = "";
+
+    if (!Array.isArray(seats) || seats.length === 0) {
+      seatSelect.innerHTML = "<option>Brak wolnych miejsc</option>";
+      return;
+    }
 
     seats.forEach(seat => {
       const opt = document.createElement("option");
@@ -223,73 +232,55 @@ document.querySelectorAll(".screeningSelect").forEach(select => {
   };
 });
 
-/* ===== UPDATE PAYMENT ===== */
+/* UPDATE PAYMENT */
 document.querySelectorAll(".savePayment").forEach(btn => {
   btn.onclick = async e => {
-    const card = e.target.closest(".reservation-card"); // ✅
+    const card = e.target.closest(".reservation-card");
     const select = card.querySelector(".paymentStatus");
-    const status = select.value;
-    const paymentId = select.dataset.paymentId;
 
     const res = await fetch(
-      `/api/admin/payments/${paymentId}/status`,
+      `/api/admin/payments/${select.dataset.paymentId}/status`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: select.value })
       }
     );
 
     const data = await res.json();
-
-    if (!res.ok) {
-      showMsg(card, data.error || "Błąd", true);
-      return;
-    }
+    if (!res.ok) return showMsg(card, data.error || "Błąd", true);
 
     showMsg(card, "Zmieniono status płatności");
+    setTimeout(() => location.reload(), 400);
   };
 });
 
-/* ===== UPDATE RESERVATION (SCREENING) ===== */
+/* UPDATE RESERVATION */
 document.querySelectorAll(".saveReservation").forEach(btn => {
   btn.onclick = async e => {
-    const card = e.target.closest(".reservation-card"); // ✅
-    const screeningId = card.querySelector(".screeningSelect").value;
-    const seatId = card.querySelector(".seatSelect").value;
+    const card = e.target.closest(".reservation-card");
 
-    const res = await fetch(
-      `/api/admin/reservations/${card.dataset.id}`,
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          screening_id: screeningId,
-          seats_id: seatId
-        })
-      }
-    );
+    const res = await fetch(`/api/admin/reservations/${card.dataset.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        screening_id: card.querySelector(".screeningSelect").value,
+        seats_id: card.querySelector(".seatSelect").value
+      })
+    });
 
     const data = await res.json();
-
-    if (!res.ok) {
-      showMsg(card, data.error || "Błąd", true);
-      return;
-    }
+    if (!res.ok) return showMsg(card, data.error || "Błąd", true);
 
     showMsg(card, "Zmieniono seans");
   };
 });
 
-/* ===== DELETE RESERVATION ===== */
+/* DELETE */
 document.querySelectorAll(".deleteReservation").forEach(btn => {
   btn.onclick = async e => {
-    const card = e.target.closest(".reservation-card"); // ✅
-
-    await fetch(`/api/admin/reservations/${card.dataset.id}`, {
-      method: "DELETE"
-    });
-
+    const card = e.target.closest(".reservation-card");
+    await fetch(`/api/admin/reservations/${card.dataset.id}`, { method: "DELETE" });
     showMsg(card, "Usunięto");
     setTimeout(() => card.remove(), 400);
   };

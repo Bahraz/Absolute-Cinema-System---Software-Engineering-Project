@@ -14,7 +14,7 @@ const ScreeningSchema: Schema = new Schema(
     _id: { type: Schema.Types.ObjectId, auto: true },
     movie_id: { type: Schema.Types.ObjectId, ref: "Movie", required: true },
     hall_id: { type: Schema.Types.ObjectId, ref: "Hall", required: true },
-    start_at: { type: Date, required: true },
+    start_at: { type: String, required: true }
   },
   {
     versionKey: false,

@@ -1,138 +1,81 @@
-import type { Request, Response } from "express";
-import { hallRepository } from "@repositories/hall.repository";
-import { seatRepository } from "@repositories/seat.repository";
+import type { Request, Response, NextFunction } from "express";
+import { hallService } from "@services/hall.service";
+import { HttpError } from "@utils/httpError";
 
 export class HallController {
-  /* ================= VIEW ================= */
-
-  async panel(req: Request, res: Response) {
-    const halls = await hallRepository.findAll();
-    res.render("admin/halls", { halls });
-  }
-
-  async details(req: Request, res: Response) {
-    const hall = await hallRepository.findById(req.params.id);
-
-    if (!hall) {
-      return res.status(404).send("Nie znaleziono sali");
-    }
-
-    const seats = await seatRepository.findByHall(hall._id.toString());
-
-    res.render("admin/hall-details", {
-      hall,
-      seats,
-    });
-  }
-
-  /* ================= API ================= */
-
-  async show(req: Request, res: Response) {
+  async show(req: Request, res: Response, next: NextFunction) {
     try {
-      const halls = await hallRepository.findAll();
-      res.status(200).json(halls);
+      const halls = await hallService.findAll();
+      res.json(halls);
     } catch (err) {
-      res.status(500).json({
-        error: "Błąd pobierania sal",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 
-  async findOne(req: Request, res: Response) {
+  async findOne(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      const hall = await hallRepository.findById(id);
+      const hall = await hallService.findById(req.params.id);
 
       if (!hall) {
-        return res.status(404).json({
-          error: "Nie znaleziono sali",
-        });
+        throw new HttpError(404, "Nie znaleziono sali", "HALL_NOT_FOUND");
       }
 
-      res.status(200).json(hall);
+      res.json(hall);
     } catch (err) {
-      res.status(500).json({
-        error: "Błąd pobierania sali",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { name } = req.body;
 
       if (!name) {
-        return res.status(400).json({
-          error: "Nazwa sali jest wymagana",
-        });
-      }
-      const existingHall = await hallRepository.findByName(name);
-      if (existingHall) {
-        return res.status(409).json({
-          error: "Sala o takiej nazwie już istnieje",
-        });
+        throw new HttpError(
+          400,
+          "Nazwa sali jest wymagana",
+          "MISSING_FIELDS"
+        );
       }
 
-      const hall = await hallRepository.create({ name });
+      const hall = await hallService.create({ name });
       res.status(201).json(hall);
     } catch (err) {
-      res.status(500).json({
-        error: "Błąd dodawania sali",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const { name } = req.body;
 
       if (!name) {
-        return res.status(400).json({
-          error: "Nazwa sali nie może być pusta",
-        });
+        throw new HttpError(
+          400,
+          "Nazwa sali nie może być pusta",
+          "MISSING_FIELDS"
+        );
       }
 
-      const updatedHall = await hallRepository.update(id, { name });
-
-      if (!updatedHall) {
-        return res.status(404).json({
-          error: "Nie znaleziono sali",
-        });
-      }
-
-      res.status(200).json(updatedHall);
+      const updatedHall = await hallService.update(id, { name });
+      res.json(updatedHall);
     } catch (err) {
-      res.status(500).json({
-        error: "Błąd edycji sali",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 
-      const deletedHall = await hallRepository.delete(id);
+      await hallService.delete(id);
 
-      if (!deletedHall) {
-        return res.status(404).json({
-          error: "Nie znaleziono sali",
-        });
-      }
-
-      res.status(200).json({
+      res.json({
         message: "Sala została usunięta",
       });
     } catch (err) {
-      res.status(500).json({
-        error: "Błąd usuwania sali",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 }

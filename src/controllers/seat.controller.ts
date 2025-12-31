@@ -1,116 +1,98 @@
-import type { Request, Response } from "express";
-import { seatRepository } from "@repositories/seat.repository";
+import type { Request, Response, NextFunction } from "express";
+import { seatService } from "@services/seat.service";
+import { HttpError } from "@utils/httpError";
 
 export class SeatController {
-  async show(req: Request, res: Response) {
+  async show(req: Request, res: Response, next: NextFunction) {
     try {
-      const seats = await seatRepository.findAll();
-      res.status(200).json(seats);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania miejsc",
-      });
+      const seats = await seatService.findAll();
+      res.json(seats);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async findOne(req: Request, res: Response) {
+  async findOne(req: Request, res: Response, next: NextFunction) {
     try {
-      const seat = await seatRepository.findById(req.params.id);
+      const seat = await seatService.findById(req.params.id);
 
       if (!seat) {
-        return res.status(404).json({
-          error: "Nie znaleziono miejsca",
-        });
+        throw new HttpError(
+          404,
+          "Nie znaleziono miejsca",
+          "SEAT_NOT_FOUND"
+        );
       }
 
-      res.status(200).json(seat);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania miejsca",
-      });
+      res.json(seat);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async findByHall(req: Request, res: Response) {
+  async findByHall(req: Request, res: Response, next: NextFunction) {
     try {
-      const seats = await seatRepository.findByHall(req.params.hallId);
-      res.status(200).json(seats);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania miejsc sali",
-      });
+      const seats = await seatService.findByHall(req.params.hallId);
+      res.json(seats);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { hall_id, row, seat_number } = req.body;
 
-      if (!hall_id || row === undefined || seat_number === undefined) {
-        return res.status(400).json({
-          error: "hall_id, row oraz seat_number są wymagane",
-        });
+      if (!hall_id || row == null || seat_number == null) {
+        throw new HttpError(
+          400,
+          "hall_id, row oraz seat_number są wymagane",
+          "MISSING_FIELDS"
+        );
       }
 
-      const seat = await seatRepository.create({
+      const seat = await seatService.create({
         hall_id,
         row,
         seat_number,
       });
 
       res.status(201).json(seat);
-    } catch {
-      res.status(500).json({
-        error: "Błąd tworzenia miejsca",
-      });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { hall_id, row, seat_number } = req.body;
 
-      if (!hall_id || row === undefined || seat_number === undefined) {
-        return res.status(400).json({
-          error: "hall_id, row oraz seat_number są wymagane",
-        });
+      if (!hall_id || row == null || seat_number == null) {
+        throw new HttpError(
+          400,
+          "hall_id, row oraz seat_number są wymagane",
+          "MISSING_FIELDS"
+        );
       }
 
-      const updated = await seatRepository.update(req.params.id, {
+      const updated = await seatService.update(req.params.id, {
         hall_id,
         row,
         seat_number,
       });
 
-      if (!updated) {
-        return res.status(404).json({
-          error: "Nie znaleziono miejsca",
-        });
-      }
-
-      res.status(200).json(updated);
-    } catch {
-      res.status(500).json({
-        error: "Błąd edycji miejsca",
-      });
+      res.json(updated);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const deleted = await seatRepository.delete(req.params.id);
-
-      if (!deleted) {
-        return res.status(404).json({
-          error: "Nie znaleziono miejsca",
-        });
-      }
-
+      await seatService.delete(req.params.id);
       res.sendStatus(204);
-    } catch {
-      res.status(500).json({
-        error: "Błąd usuwania miejsca",
-      });
+    } catch (err) {
+      next(err);
     }
   }
 }

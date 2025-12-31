@@ -85,9 +85,9 @@ document.getElementById("addEmployee").onsubmit = async e => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId: f.userId.value,
-      role: f.role.value
-    })
+  user_id: f.userId.value,
+  role: f.role.value
+})
   });
 
   const data = await res.json();
@@ -112,7 +112,14 @@ document.querySelectorAll(".save").forEach(btn => {
       body: JSON.stringify({ role })
     });
 
-    if (res.ok) showMsg(li, "Zapisano");
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Błąd zapisu");
+      return;
+    }
+
+    showMsg(li, "Zapisano");
   };
 });
 

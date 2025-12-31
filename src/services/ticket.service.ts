@@ -2,7 +2,7 @@ import {
   ticketRepository,
   TicketStatus,
 } from "@repositories/ticket.repository";
-import { Payment } from "@models/payment.model";
+import { paymentRepository } from "@repositories/payment.repository";
 
 export class TicketService {
   async getAll() {
@@ -22,7 +22,7 @@ export class TicketService {
     amount: number;
     expires_at: Date;
   }) {
-    const payment = await Payment.findById(data.payment_id);
+    const payment = await paymentRepository.findById(data.payment_id);
     if (!payment) {
       throw new Error("PAYMENT_NOT_FOUND");
     }
@@ -49,7 +49,7 @@ export class TicketService {
       throw new Error("TICKET_NOT_FOUND");
     }
 
-    return ticketRepository.updateStatus(ticketId, "WYGASŁY");
+    return ticketRepository.updateStatus(ticketId, "NIEAKTYWNY");
   }
 
   async delete(ticketId: string) {
@@ -61,10 +61,17 @@ export class TicketService {
     if (!ticket) return null;
 
     if (ticket.expires_at < new Date()) {
-      return ticketRepository.updateStatus(ticketId, "WYGASŁY");
+      return ticketRepository.updateStatus(ticketId, "NIEAKTYWNY");
     }
 
     return ticket;
+  }
+
+  async deactivateTicket(ticketId: string) {
+    const ticket = await ticketRepository.findById(ticketId);
+    if (!ticket) throw new Error("TICKET_NOT_FOUND");
+
+    return ticketRepository.updateStatus(ticketId, "NIEAKTYWNY");
   }
 }
 

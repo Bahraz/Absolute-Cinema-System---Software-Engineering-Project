@@ -1,6 +1,6 @@
 import { Ticket } from "@models/ticket.model";
 
-export type TicketStatus = "AKTYWNY" | "WYGASŁY";
+export type TicketStatus = "AKTYWNY" | "NIEAKTYWNY";
 
 export class TicketRepository {
   findAll() {
@@ -18,7 +18,7 @@ export class TicketRepository {
   create(data: { payment_id: string; amount: number; expires_at: Date }) {
     return Ticket.create({
       ...data,
-      status: "AKTYWNY",
+      status: "NIEAKTYWNY",
     });
   }
 

@@ -1,52 +1,65 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { ticketService } from "@services/ticket.service";
+import { HttpError } from "@utils/httpError";
 
 export class TicketController {
-
-  async show(req: Request, res: Response) {
+  async show(req: Request, res: Response, next: NextFunction) {
     try {
       const tickets = await ticketService.getAll();
-      res.status(200).json(tickets);
-    } catch {
-      res.status(500).json({ error: "Błąd pobierania biletów" });
+      res.json(tickets);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async findOne(req: Request, res: Response) {
+  async findOne(req: Request, res: Response, next: NextFunction) {
     try {
       const ticket = await ticketService.getById(req.params.id);
+
       if (!ticket) {
-        return res.status(404).json({ error: "Nie znaleziono biletu" });
+        throw new HttpError(
+          404,
+          "Nie znaleziono biletu",
+          "TICKET_NOT_FOUND"
+        );
       }
+
       res.json(ticket);
-    } catch {
-      res.status(500).json({ error: "Błąd pobierania biletu" });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async findByPayment(req: Request, res: Response) {
+  async findByPayment(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await ticketService.getByPayment(req.params.paymentId);
+      const ticket = await ticketService.getByPayment(
+        req.params.paymentId
+      );
+
       if (!ticket) {
-        return res.status(404).json({
-          error: "Nie znaleziono biletu dla tej płatności",
-        });
+        throw new HttpError(
+          404,
+          "Nie znaleziono biletu",
+          "TICKET_NOT_FOUND"
+        );
       }
+
       res.json(ticket);
-    } catch {
-      res.status(500).json({ error: "Błąd pobierania biletu" });
+    } catch (err) {
+      next(err);
     }
   }
 
-
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { payment_id, amount, expires_at } = req.body;
 
-      if (!payment_id || amount === undefined || !expires_at) {
-        return res.status(400).json({
-          error: "payment_id, amount oraz expires_at są wymagane",
-        });
+      if (!payment_id || amount == null || !expires_at) {
+        throw new HttpError(
+          400,
+          "payment_id, amount i expires_at są wymagane",
+          "MISSING_FIELDS"
+        );
       }
 
       const ticket = await ticketService.createTicket({
@@ -57,61 +70,34 @@ export class TicketController {
 
       res.status(201).json(ticket);
     } catch (err) {
-      if (err instanceof Error && err.message === "PAYMENT_NOT_FOUND") {
-        return res.status(404).json({
-          error: "Nie znaleziono płatności",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd tworzenia biletu",
-      });
+      next(err);
     }
   }
 
-  async activate(req: Request, res: Response) {
+  async activate(req: Request, res: Response, next: NextFunction) {
     try {
       const ticket = await ticketService.activateTicket(req.params.id);
       res.json(ticket);
     } catch (err) {
-      if (err instanceof Error && err.message === "TICKET_NOT_FOUND") {
-        return res.status(404).json({
-          error: "Nie znaleziono biletu",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd aktywacji biletu",
-      });
+      next(err);
     }
   }
 
-  async expire(req: Request, res: Response) {
+  async expire(req: Request, res: Response, next: NextFunction) {
     try {
       const ticket = await ticketService.expireTicket(req.params.id);
       res.json(ticket);
     } catch (err) {
-      if (err instanceof Error && err.message === "TICKET_NOT_FOUND") {
-        return res.status(404).json({
-          error: "Nie znaleziono biletu",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd wygaszania biletu",
-      });
+      next(err);
     }
   }
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const deleted = await ticketService.delete(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ error: "Nie znaleziono biletu" });
-      }
+      await ticketService.delete(req.params.id);
       res.sendStatus(204);
-    } catch {
-      res.status(500).json({ error: "Błąd usuwania biletu" });
+    } catch (err) {
+      next(err);
     }
   }
 }

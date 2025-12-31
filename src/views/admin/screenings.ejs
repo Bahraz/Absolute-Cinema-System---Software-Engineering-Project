@@ -16,7 +16,9 @@
     <% }) %>
   </select>
 
+  <!-- ADMIN USTAWIA GODZINĘ -->
   <input type="datetime-local" name="start_at" required />
+
   <button>Dodaj seans</button>
   <span class="msg"></span>
 </form>
@@ -24,35 +26,39 @@
 <hr />
 
 <ul id="screenings">
-  <% screenings.forEach(s => { 
+  <% screenings.forEach(s => {
        const locked = s.reservationsCount > 0;
   %>
     <li data-id="<%= s._id %>" class="<%= locked ? 'locked' : '' %>">
 
-<select class="movie" <%= locked ? 'disabled' : '' %>>
-  <% movies.forEach(m => { %>
-    <option
-      value="<%= m._id %>"
-      <%= s.movie_id && m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
-      <%= m.title %>
-    </option>
-  <% }) %>
-</select>
+      <!-- DEBUG (opcjonalnie) -->
+      <!-- <small style="color:#999">DB: <%= s.start_at %></small> -->
+
+      <select class="movie" <%= locked ? 'disabled' : '' %>>
+        <% movies.forEach(m => { %>
+          <option
+            value="<%= m._id %>"
+            <%= s.movie_id && m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
+            <%= m.title %>
+          </option>
+        <% }) %>
+      </select>
 
       <select class="hall" <%= locked ? 'disabled' : '' %>>
         <% halls.forEach(h => { %>
           <option
             value="<%= h._id %>"
-            <%= h._id.toString() === s.hall_id._id.toString() ? "selected" : "" %>>
+            <%= s.hall_id && h._id.toString() === s.hall_id._id.toString() ? "selected" : "" %>>
             <%= h.name %>
           </option>
         <% }) %>
       </select>
 
+      <!-- STRING → STRING, ZERO MAGII -->
       <input
         type="datetime-local"
         class="start_at"
-        value="<%= new Date(s.start_at).toISOString().slice(0,16) %>"
+        value="<%= s.start_at %>"
         <%= locked ? 'disabled' : '' %>
       />
 
@@ -69,16 +75,20 @@
 </ul>
 
 <style>
-  .locked {
+.locked {
   opacity: 0.6;
   background: #f5f5f5;
 }
-
 .locked select,
 .locked input {
   cursor: not-allowed;
 }
-.msg { margin-left: 10px; opacity: 0; transition: 0.2s; color: green; }
+.msg {
+  margin-left: 10px;
+  opacity: 0;
+  transition: 0.2s;
+  color: green;
+}
 .msg.show { opacity: 1; }
 .msg.error { color: red; }
 </style>
@@ -95,6 +105,7 @@ function showMsg(el, text, error = false) {
   }, 1500);
 }
 
+// CREATE – WYSYŁAMY STRING Z INPUTA
 document.getElementById("addScreening").onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
@@ -105,7 +116,7 @@ document.getElementById("addScreening").onsubmit = async e => {
     body: JSON.stringify({
       movie_id: f.movie_id.value,
       hall_id: f.hall_id.value,
-      start_at: f.start_at.value
+      start_at: f.start_at.value // ⬅️ STRING
     })
   });
 
@@ -120,6 +131,7 @@ document.getElementById("addScreening").onsubmit = async e => {
   setTimeout(() => location.reload(), 500);
 };
 
+// UPDATE – WYSYŁAMY STRING Z INPUTA
 document.querySelectorAll(".save").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");
@@ -130,7 +142,7 @@ document.querySelectorAll(".save").forEach(btn => {
       body: JSON.stringify({
         movie_id: li.querySelector(".movie").value,
         hall_id: li.querySelector(".hall").value,
-        start_at: li.querySelector(".start_at").value
+        start_at: li.querySelector(".start_at").value // ⬅️ STRING
       })
     });
 
@@ -145,6 +157,7 @@ document.querySelectorAll(".save").forEach(btn => {
   };
 });
 
+// DELETE
 document.querySelectorAll(".delete").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");

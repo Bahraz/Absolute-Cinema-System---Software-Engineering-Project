@@ -64,15 +64,36 @@ export class ReservationRepository {
   }) {
     return Reservation.create(data);
   }
+  update(id: string, data: { screening_id?: string; seats_id?: string }) {
+    return Reservation.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    });
+  }
   delete(id: string) {
     return Reservation.findByIdAndDelete(id);
+  }
+  markInactive(id: string) {
+    return Reservation.findByIdAndUpdate(
+      id,
+      { is_active: false },
+      { new: true }
+    );
   }
   count() {
     return Reservation.countDocuments();
   }
-  findByScreening(screeningId: string) {
-    return Reservation.find({ screening_id: screeningId });
+
+  countByScreening(screeningId: string) {
+    return Reservation.countDocuments({ screening_id: screeningId });
   }
+
+  findByScreening(screeningId: string) {
+  return Reservation.find(
+    { screening_id: screeningId },
+    { seats_id: 1 }
+  );
+}
 }
 
 export const reservationRepository = new ReservationRepository();

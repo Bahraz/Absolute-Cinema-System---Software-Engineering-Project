@@ -3,6 +3,9 @@ import {
   PaymentStatus,
   PaymentProvider,
 } from "@repositories/payment.repository";
+import { ticketRepository } from "@repositories/ticket.repository";
+import { ticketService } from "@services/ticket.service";
+import { HttpError } from "@utils/httpError";
 
 const ALLOWED_TRANSITIONS: Record<PaymentStatus, PaymentStatus[]> = {
   ZAINICJOWANA: ["W TRAKCIE", "NIEUDANA"],
@@ -18,27 +21,60 @@ export class PaymentService {
   }
 
   async getById(id: string) {
-    return paymentRepository.findById(id);
+    const payment = await paymentRepository.findById(id);
+    if (!payment) {
+      throw new HttpError(404, "Nie znaleziono płatności", "PAYMENT_NOT_FOUND");
+    }
+    return payment;
   }
 
   async createPayment(provider: PaymentProvider) {
+    if (!provider) {
+      throw new HttpError(400, "Provider jest wymagany", "MISSING_PROVIDER");
+    }
+
     return paymentRepository.create(provider);
   }
 
+  /**
+   * 🔥 JEDYNE miejsce zmiany statusu płatności
+   * 🔥 TU synchronizujemy TICKET
+   */
   async changeStatus(paymentId: string, newStatus: PaymentStatus) {
     const payment = await paymentRepository.findById(paymentId);
     if (!payment) {
-      throw new Error("PAYMENT_NOT_FOUND");
+      throw new HttpError(404, "Nie znaleziono płatności", "PAYMENT_NOT_FOUND");
     }
 
-    const allowed = ALLOWED_TRANSITIONS[payment.status];
+    const allowed = ALLOWED_TRANSITIONS[payment.status] ?? [];
     if (!allowed.includes(newStatus)) {
-      throw new Error(
-        `INVALID_STATUS_TRANSITION: ${payment.status} → ${newStatus}`
+      throw new HttpError(
+        400,
+        `Nieprawidłowa zmiana statusu: ${payment.status} → ${newStatus}`,
+        "INVALID_STATUS_TRANSITION"
       );
     }
 
-    return paymentRepository.updateStatus(paymentId, newStatus);
+    // ✅ UPDATE PAYMENT
+    const updatedPayment = await paymentRepository.updateStatus(
+      paymentId,
+      newStatus
+    );
+
+    // 🎟️ SYNC TICKET
+    const ticket = await ticketRepository.findByPayment(paymentId);
+
+    if (ticket) {
+      if (newStatus === "OPŁACONA") {
+        await ticketService.activateTicket(ticket._id.toString());
+      }
+
+      if (newStatus === "ZWRÓCONO") {
+        await ticketService.deactivateTicket(ticket._id.toString());
+      }
+    }
+
+    return updatedPayment;
   }
 
   async delete(paymentId: string) {

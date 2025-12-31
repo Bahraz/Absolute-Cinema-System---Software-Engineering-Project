@@ -1,18 +1,18 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { authService } from "@services/auth.service";
+import { HttpError } from "@utils/httpError";
 
 export class AuthController {
-  async register(req: Request, res: Response) {
-    console.log("HEADERS:", req.headers["content-type"]);
-    console.log("BODY:", req.body);
-
+  async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { name, surname, email, password } = req.body;
 
       if (!name || !surname || !email || !password) {
-        return res.status(400).json({
-          error: "name, surname, email i password są wymagane",
-        });
+        throw new HttpError(
+          400,
+          "name, surname, email i password są wymagane",
+          "MISSING_FIELDS"
+        );
       }
 
       const user = await authService.register({
@@ -28,26 +28,20 @@ export class AuthController {
         email: user.email,
       });
     } catch (err) {
-      if (err instanceof Error && err.message === "EMAIL_EXISTS") {
-        return res.status(409).json({
-          error: "Użytkownik o takim emailu już istnieje",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd rejestracji",
-      });
+      next(err);
     }
   }
 
-  async login(req: Request, res: Response) {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({
-          error: "email i password są wymagane",
-        });
+        throw new HttpError(
+          400,
+          "email i password są wymagane",
+          "MISSING_FIELDS"
+        );
       }
 
       const user = await authService.login(email, password);
@@ -69,24 +63,7 @@ export class AuthController {
         redirect,
       });
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "INVALID_CREDENTIALS") {
-          return res.status(401).json({
-            error: "Nieprawidłowe dane logowania",
-          });
-        }
-
-        // 🔒 BLOKADA KONTA
-        if (err.message === "ACCOUNT_DISABLED") {
-          return res.status(403).json({
-            error: "Konto zostało dezaktywowane",
-          });
-        }
-      }
-
-      res.status(500).json({
-        error: "Błąd logowania",
-      });
+      next(err);
     }
   }
 

@@ -1,10 +1,8 @@
-import type { Request, Response } from "express";
-import { userRepository } from "@repositories/user.repository";
-import { employeesRepository } from "@repositories/employees.repository";
-import { EmployeeRole } from "@models/employees.model";
-import { movieRepository } from "@repositories/movie.repository";
-import { screeningRepository } from "@repositories/screening.repository";
-import { reservationRepository } from "@repositories/reservation.repository";
+import type { Request, Response, NextFunction } from "express";
+import { userService } from "@services/user.service";
+import { employeesService } from "@services/employees.service";
+import { adminService } from "@services/admin.service";
+import { HttpError } from "@utils/httpError";
 
 export class AdminController {
   async dashboard(req: Request, res: Response) {
@@ -14,152 +12,97 @@ export class AdminController {
     });
   }
 
-  async dashboardStats(req: Request, res: Response) {
+  async dashboardStats(req: Request, res: Response, next: NextFunction) {
     try {
-      const [
-        usersCount,
-        employeesCount,
-        moviesCount,
-        screeningsCount,
-        reservationsCount,
-        upcomingScreenings,
-      ] = await Promise.all([
-        userRepository.count(),
-        employeesRepository.count(),
-        movieRepository.count(),
-        screeningRepository.count(),
-        reservationRepository.count(),
-        screeningRepository.findUpcoming(),
-      ]);
-
-      res.status(200).json({
-        users: usersCount,
-        employees: employeesCount,
-        movies: moviesCount,
-        screenings: screeningsCount,
-        reservations: reservationsCount,
-        upcomingScreenings,
-      });
+      const stats = await adminService.dashboardStats();
+      res.status(200).json(stats);
     } catch (err) {
-      console.error("DASHBOARD ERROR:", err);
-      res.status(500).json({
-        error: "Błąd ładowania dashboardu",
-        details: err instanceof Error ? err.message : err,
-      });
+      next(err);
     }
   }
 
-  async getEmployees(req: Request, res: Response) {
+  async getEmployees(req: Request, res: Response, next: NextFunction) {
     try {
-      const employees = await employeesRepository.findAllWithUserNames();
+      const employees = await adminService.getEmployees();
       res.status(200).json(employees);
-    } catch {
-      res.status(500).json({ error: "Błąd pobierania pracowników" });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async addEmployee(req: Request, res: Response) {
+  async addEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const { userId, role } = req.body;
 
       if (!userId || !role) {
-        return res.status(400).json({ error: "userId i role są wymagane" });
+        throw new HttpError(400, "Brak wymaganych pól", "MISSING_FIELDS");
       }
 
-      if (!["Pracownik", "Kierownik"].includes(role)) {
-        return res.status(400).json({ error: "Nieprawidłowa rola" });
-      }
+      const employee = await employeesService.addEmployee(userId, role);
 
-      const user = await userRepository.findById(userId);
-      if (!user) {
-        return res.status(404).json({ error: "Użytkownik nie istnieje" });
-      }
-
-      const existing = await employeesRepository.findByUserId(userId);
-      if (existing) {
-        return res.status(409).json({
-          error: "Ten użytkownik jest już pracownikiem",
-        });
-      }
-
-      const employee = await employeesRepository.create({
-        user_id: user._id.toString(),
-        role: role as EmployeeRole,
+      res.status(201).json({
+        message: "Pracownik dodany",
+        employee,
       });
-
-      res.status(201).json({ message: "Pracownik dodany", employee });
-    } catch {
-      res.status(500).json({ error: "Błąd dodawania pracownika" });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async updateEmployeeRole(req: Request, res: Response) {
+  async updateEmployeeRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const { role } = req.body;
 
-      if (!["Pracownik", "Kierownik"].includes(role)) {
-        return res.status(400).json({ error: "Nieprawidłowa rola" });
-      }
+      const updated = await employeesService.updateRole(id, role);
 
-      const employee = await employeesRepository.findById(id);
-      if (!employee) {
-        return res.status(404).json({ error: "Pracownik nie istnieje" });
-      }
-
-      employee.role = role as EmployeeRole;
-      await employee.save();
-
-      res.status(200).json({ message: "Rola zaktualizowana", employee });
-    } catch {
-      res.status(500).json({ error: "Błąd aktualizacji roli" });
+      res.status(200).json({
+        message: "Rola zaktualizowana",
+        employee: updated,
+      });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async removeEmployee(req: Request, res: Response) {
+  async removeEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 
-      const employee = await employeesRepository.findById(id);
-      if (!employee) {
-        return res.status(404).json({ error: "Pracownik nie istnieje" });
-      }
+      await employeesService.removeEmployee(id);
 
-      await employeesRepository.delete(id);
-      res.status(200).json({ message: "Pracownik usunięty" });
-    } catch {
-      res.status(500).json({ error: "Błąd usuwania pracownika" });
+      res.status(200).json({
+        message: "Pracownik usunięty",
+      });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async resetUserPassword(req: Request, res: Response) {
+  async resetUserPassword(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const { password } = req.body;
 
       if (!password || password.length < 6) {
-        return res.status(400).json({
-          error: "Hasło musi mieć min. 6 znaków",
-        });
+        throw new HttpError(
+          400,
+          "Hasło musi mieć min. 6 znaków",
+          "INVALID_PASSWORD"
+        );
       }
 
-      const user = await userRepository.findById(id);
-      if (!user) {
-        return res.status(404).json({
-          error: "Użytkownik nie istnieje",
-        });
-      }
+      const ok = await userService.updateUserPassword(id, password);
 
-      await userRepository.updatePassword(id, password);
+      if (!ok) {
+        throw new HttpError(404, "Użytkownik nie istnieje", "USER_NOT_FOUND");
+      }
 
       res.json({
         message: "Hasło użytkownika zostało zresetowane",
       });
     } catch (err) {
-      console.error("RESET PASSWORD ERROR:", err);
-      res.status(500).json({
-        error: "Błąd resetowania hasła",
-      });
+      next(err);
     }
   }
 }

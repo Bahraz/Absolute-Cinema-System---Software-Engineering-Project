@@ -1,132 +1,124 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { userService } from "@services/user.service";
+import { HttpError } from "@utils/httpError";
 
 export class UserController {
-  /* ================= VIEW ================= */
-
-  async myProfilePanel(req: Request, res: Response) {
-    const user = await userService.getProfile(req.user.id);
-    const reservations = await userService.getMyReservations(req.user.id);
-
-    res.render("user/my-profile", {
-      user,
-      reservations,
-    });
-  }
-
-  /* ================= ADMIN VIEW ================= */
-  async panel(req: Request, res: Response) {
-    const users = await userService.getAllUsers();
-    res.render("admin/users", { users });
-  }
-
-  /* ================= ADMIN API ================= */
-  async getAll(req: Request, res: Response) {
-    const users = await userService.getAllUsers();
-    res.json(users);
-  }
-
-  async update(req: Request, res: Response) {
-    const { name, surname, email } = req.body;
-
-    if (!name && !surname && !email) {
-      return res.status(400).json({
-        error: "Brak danych do aktualizacji",
-      });
-    }
-
-    const user = await userService.updateUser(req.params.id, {
-      name,
-      surname,
-      email,
-    });
-
-    res.json(user);
-  }
-
-  async delete(req: Request, res: Response) {
-    const ok = await userService.deactivateUser(req.params.id);
-
-    if (!ok) {
-      return res.status(404).json({ error: "Nie znaleziono użytkownika" });
-    }
-
-    res.sendStatus(204);
-  }
-
-  async getProfile(req: Request, res: Response) {
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.getProfile(req.user.id);
+      const users = await userService.getAllUsers();
+      res.json(users);
+    } catch (err) {
+      next(err);
+    }
+  }
 
-      if (!user) {
-        return res.status(404).json({
-          error: "Nie znaleziono użytkownika",
-        });
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, surname, email } = req.body;
+
+      if (!name && !surname && !email) {
+        throw new HttpError(
+          400,
+          "Brak danych do aktualizacji",
+          "MISSING_FIELDS"
+        );
       }
 
-      res.status(200).json(user);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania profilu",
+      const user = await userService.updateUser(req.params.id, {
+        name,
+        surname,
+        email,
       });
+
+      res.json(user);
+    } catch (err) {
+      next(err);
     }
   }
 
-  async getScreenings(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      await userService.deactivateUser(req.params.id);
+      res.sendStatus(204);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async toggleActive(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.toggleUserActive(req.params.id);
+
+      res.json({ is_active: user.is_active });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /* ================= USER API ================= */
+
+  async getProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await userService.getProfile(req.user.id);
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getScreenings(req: Request, res: Response, next: NextFunction) {
     try {
       const screenings = await userService.getScreenings();
-      res.status(200).json(screenings);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania seansów",
-      });
+      res.json(screenings);
+    } catch (err) {
+      next(err);
     }
-  }
-  async toggleActive(req: Request, res: Response) {
-    const user = await userService.toggleUserActive(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({
-        error: "Nie znaleziono użytkownika",
-      });
-    }
-
-    res.json({
-      is_active: user.is_active,
-    });
   }
 
   /* ================= UPDATE PROFILE ================= */
 
-  async updateProfile(req: Request, res: Response) {
-    const { name, surname, email } = req.body;
-    if (!name && !surname && !email) {
-      return res.status(400).json({
-        error: "Brak danych do aktualizacji",
+  async updateProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, surname, email } = req.body;
+
+      if (!name && !surname && !email) {
+        throw new HttpError(
+          400,
+          "Brak danych do aktualizacji",
+          "MISSING_FIELDS"
+        );
+      }
+
+      const user = await userService.updateUser(req.user.id, {
+        name,
+        surname,
+        email,
       });
+
+      res.json(user);
+    } catch (err) {
+      next(err);
     }
-
-    const user = await userService.updateUser(req.user.id, {
-      name,
-      surname,
-      email,
-    });
-
-    res.json(user);
   }
 
-  async updatePassword(req: Request, res: Response) {
-    const { password } = req.body;
+  async updatePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({
-        error: "Hasło musi mieć min. 6 znaków",
-      });
+      if (!password || password.length < 6) {
+        throw new HttpError(
+          400,
+          "Hasło musi mieć min. 6 znaków",
+          "INVALID_PASSWORD"
+        );
+      }
+
+      await userService.updateUserPassword(req.user.id, password);
+
+      res.json({ message: "Hasło zmienione" });
+    } catch (err) {
+      next(err);
     }
-
-    await userService.updateUserPassword(req.user.id, password);
-
-    res.json({ message: "Hasło zmienione" }); // ✅
   }
 }
 

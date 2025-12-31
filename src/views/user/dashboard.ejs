@@ -10,7 +10,7 @@ include("partials/sidebar") %>
     <% } else { %> ⚠️ Brak danych filmu <% } %>
 
     <div class="details">
-      🏛️ Sala: <%= s.hall_id.name %><br />
+      🏛️ <%= s.hall_id.name %><br />
       🕒 <%= new Date(s.start_at).toLocaleString() %>
     </div>
   </li>

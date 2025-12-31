@@ -1,65 +1,59 @@
-import type { Request, Response } from "express";
-import { employeesRepository } from "@repositories/employees.repository";
-import { User } from "@models/user.model";
+import type { Request, Response, NextFunction } from "express";
+import { employeesService } from "@services/employees.service";
+import { userService } from "@services/user.service";
+import { HttpError } from "@utils/httpError";
 
 export class EmployeesController {
-   /* ================= VIEW ================= */
-  async panel(req: Request, res: Response) {
-    const employees = await employeesRepository.findAllWithUserNames();
-
-    // lista userów bez przypisanego stanowiska
-    const users = await User.find({
-      _id: { $nin: employees.map(e => e.user_id._id) }
-    }).select("name surname email");
-
-    res.render("admin/employees", {
-      employees,
-      users
-    });
+  async show(req: Request, res: Response, next: NextFunction) {
+    try {
+      const employees = await employeesService.findAllWithUserNames();
+      res.json(employees);
+    } catch (err) {
+      next(err);
+    }
   }
 
-   /* ================= API ================= */
-  async show(req: Request, res: Response) {
-    const employees = await employeesRepository.findAllWithUserNames();
-    res.json(employees);
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user_id, role } = req.body;
+
+      if (!user_id || !role) {
+        throw new HttpError(
+          400,
+          "user_id oraz rola są wymagane",
+          "MISSING_FIELDS"
+        );
+      }
+
+      const employee = await employeesService.addEmployee(user_id, role);
+      res.status(201).json(employee);
+    } catch (err) {
+      next(err);
+    }
   }
 
-  async create(req: Request, res: Response) {
-    const { user_id, role } = req.body;
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { role } = req.body;
 
-    if (!user_id || !role) {
-      return res.status(400).json({ error: "user_id oraz rola są wymagane" });
+      const updated = await employeesService.updateRole(
+        req.params.id,
+        role
+      );
+
+      res.json(updated);
+    } catch (err) {
+      next(err);
     }
-
-    const existing = await employeesRepository.findByUserId(user_id);
-    if (existing) {
-      return res.status(409).json({
-        error: "Ten użytkownik ma już przypisaną rolę",
-      });
-    }
-
-    const employee = await employeesRepository.create({ user_id, role });
-    res.status(201).json(employee);
   }
 
-  async update(req: Request, res: Response) {
-    const { role } = req.body;
-
-    const updated = await employeesRepository.update(req.params.id, role);
-    if (!updated) {
-      return res.status(404).json({ error: "Nie znaleziono pracownika" });
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      await employeesService.removeEmployee(req.params.id);
+      res.sendStatus(204);
+    } catch (err) {
+      next(err);
     }
-
-    res.json(updated);
-  }
-
-  async delete(req: Request, res: Response) {
-    const deleted = await employeesRepository.delete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: "Nie znaleziono pracownika" });
-    }
-
-    res.sendStatus(204);
   }
 }
 

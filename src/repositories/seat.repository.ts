@@ -31,6 +31,9 @@ export class SeatRepository {
   delete(id: string) {
     return Seat.findByIdAndDelete(id);
   }
+  async deleteByHallId(hallId: string) {
+  return Seat.deleteMany({ hall_id: hallId });
+}
 }
 
 export const seatRepository = new SeatRepository();

@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import session from "express-session";
 import router from "@routes/index";
+import errorHandler from "@middlewares/error.middleware";
 
 const app = express();
 
@@ -29,5 +30,8 @@ app.use(
 
 /* ================= ROUTES ================= */
 app.use(router);
+
+/* ================= ERROR HANDLER ================= */
+app.use(errorHandler);
 
 export default app;

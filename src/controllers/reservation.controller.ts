@@ -1,82 +1,84 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { reservationService } from "@services/reservation.service";
-import { reservationRepository } from "@repositories/reservation.repository";
-import { screeningRepository } from "@repositories/screening.repository";
+import { screeningService } from "@services/screening.service";
+import { HttpError } from "@utils/httpError";
 
 export class ReservationController {
-  async userPanel(req: Request, res: Response) {
-    const screenings = await screeningRepository.findUpcoming();
-
-    res.render("user/reservation", {
-      screenings,
-    });
-  }
-
-  // ========================
-  // USER VIEW – MOJE REZERWACJE
-  // ========================
-  async myReservationPanel(req: Request, res: Response) {
-    const reservations = await reservationRepository.findByUserId(req.user.id);
-
-    res.render("user/my-reservations", {
-      reservations,
-    });
-  }
-  // ========================
-  // ADMIN VIEW
-  // ========================
-  async panel(req: Request, res: Response) {
-    const reservations = await reservationRepository.findAll();
-    const screenings = await screeningRepository.findAll();
-
-    res.render("admin/reservations", {
-      reservations,
-      screenings, // 🔥 TO BYŁO BRAKIEM
-    });
-  }
-
-  // ========================
-  // USER – MOJE REZERWACJE
-  // ========================
-  async getMyReservation(req: Request, res: Response) {
+  /* ========================
+     USER VIEW – PANEL
+  ======================== */
+  async userPanel(req: Request, res: Response, next: NextFunction) {
     try {
-      const reservations = await reservationRepository.findByUserId(
-        req.user.id
-      );
-
-      res.status(200).json(reservations);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania rezerwacji",
-      });
+      const { screenings } = await screeningService.getUserPanelData();
+      res.render("user/reservation", { screenings });
+    } catch (err) {
+      next(err);
     }
   }
 
-  // ========================
-  // ADMIN – WSZYSTKIE
-  // ========================
-  async getAll(req: Request, res: Response) {
+  /* ========================
+     USER VIEW – MOJE REZERWACJE
+  ======================== */
+  async myReservationPanel(req: Request, res: Response, next: NextFunction) {
     try {
-      const reservations = await reservationRepository.findAll();
-      res.status(200).json(reservations);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania rezerwacji",
-      });
+      const reservations = await reservationService.findByUserId(req.user.id);
+      res.render("user/my-reservations", { reservations });
+    } catch (err) {
+      next(err);
     }
   }
 
-  // ========================
-  // UTWÓRZ REZERWACJĘ (USER)
-  // ========================
-  async create(req: Request, res: Response) {
+  /* ========================
+     ADMIN VIEW
+  ======================== */
+  async panel(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { reservations, screenings } =
+        await reservationService.getPanelData();
+
+      res.render("admin/reservations", { reservations, screenings });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /* ========================
+     USER – API
+  ======================== */
+  async getMyReservation(req: Request, res: Response, next: NextFunction) {
+    try {
+      const reservations = await reservationService.findByUserId(req.user.id);
+      res.json(reservations);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /* ========================
+     ADMIN – API
+  ======================== */
+  async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const reservations = await reservationService.findAll();
+      res.json(reservations);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /* ========================
+     CREATE RESERVATION (USER)
+  ======================== */
+  async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { screening_id, seats_id, payment_provider } = req.body;
 
       if (!screening_id || !seats_id || !payment_provider) {
-        return res.status(400).json({
-          error: "screening_id, seats_id i payment_provider są wymagane",
-        });
+        throw new HttpError(
+          400,
+          "Brak wymaganych danych rezerwacji",
+          "MISSING_FIELDS"
+        );
       }
 
       const reservation = await reservationService.createReservation({
@@ -87,104 +89,69 @@ export class ReservationController {
       });
 
       res.status(201).json(reservation);
-    } catch (err: any) {
-      if (err instanceof Error && err.message === "SEAT_ALREADY_RESERVED") {
-        return res.status(409).json({
-          error: "Wybrane miejsce jest już zajęte",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd tworzenia rezerwacji",
-      });
+    } catch (err) {
+      next(err);
     }
   }
 
-  async update(req: Request, res: Response) {
+  /* ========================
+     UPDATE RESERVATION
+  ======================== */
+  async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { screening_id, seats_id } = req.body;
 
-      if (!screening_id || !seats_id) {
-        return res.status(400).json({
-          error: "screening_id oraz seats_id są wymagane",
-        });
-      }
-
-      const reservation = await reservationRepository.findById(req.params.id);
-      if (!reservation) {
-        return res.status(404).json({
-          error: "Nie znaleziono rezerwacji",
-        });
-      }
-
-      // 🔒 sprawdzamy kolizję miejsca w nowym seansie
-      const existing = await reservationRepository.findByScreeningAndSeat(
+      const updated = await reservationService.updateReservation(
+        req.params.id,
         screening_id,
         seats_id
       );
 
-      // ⚠️ wykluczamy aktualną rezerwację
-      if (existing && existing._id.toString() !== reservation._id.toString()) {
-        return res.status(409).json({
-          error: "To miejsce jest już zajęte w wybranym seansie",
-        });
-      }
-
-      reservation.screening_id = screening_id;
-      reservation.seats_id = seats_id;
-
-      await reservation.save();
-
-      res.json(reservation);
+      res.json(updated);
     } catch (err) {
-      console.error("UPDATE RESERVATION ERROR:", err);
-      res.status(500).json({
-        error: "Błąd edycji rezerwacji",
-      });
+      next(err);
     }
   }
-  // ========================
-  // ANULUJ REZERWACJĘ
-  // ========================
-  async cancel(req: Request, res: Response) {
+
+  /* ========================
+     CANCEL RESERVATION
+  ======================== */
+  async cancel(req: Request, res: Response, next: NextFunction) {
     try {
       await reservationService.cancelReservation(req.params.id);
       res.sendStatus(204);
     } catch (err) {
-      if (err instanceof Error && err.message === "RESERVATION_NOT_FOUND") {
-        return res.status(404).json({
-          error: "Nie znaleziono rezerwacji",
-        });
-      }
-
-      res.status(500).json({
-        error: "Błąd anulowania rezerwacji",
-      });
+      next(err);
     }
   }
 
-  async getAvailableSeats(req: Request, res: Response) {
+  /* ========================
+     AVAILABLE SEATS
+  ======================== */
+  async getAvailableSeats(req: Request, res: Response, next: NextFunction) {
     try {
       const seats = await reservationService.getAvailableSeatsForScreening(
         req.params.screeningId
       );
 
       res.json(seats);
-    } catch {
-      res.status(500).json({
-        error: "Błąd pobierania wolnych miejsc",
-      });
+    } catch (err) {
+      next(err);
     }
   }
-  async getPrice(req: Request, res: Response) {
-    try {
-      const { screeningId } = req.params;
 
-      const price = await reservationService.calculatePrice(screeningId);
+  /* ========================
+     PRICE CALCULATION
+  ======================== */
+  async getPrice(req: Request, res: Response, next: NextFunction) {
+    try {
+      const price = await reservationService.calculatePrice(
+        req.params.screeningId
+      );
 
       res.json({ price });
-    } catch {
-      res.status(500).json({ error: "Błąd obliczania ceny" });
+    } catch (err) {
+      next(err);
     }
   }
 }

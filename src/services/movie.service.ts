@@ -1,4 +1,6 @@
 import { movieRepository } from "@repositories/movie.repository";
+import { actorRepository } from "@repositories/actor.repository";
+import { genreRepository } from "@repositories/genre.repository";
 
 export class MovieService {
   async getAllMovies() {
@@ -17,6 +19,14 @@ export class MovieService {
       actors: actors.map((a) => a.actor_id),
       genres: genres.map((g) => g.genre_id),
     };
+  }
+
+  async getAllActors() {
+    return actorRepository.findAll();
+  }
+
+  async getAllGenres() {
+    return genreRepository.findAll();
   }
 
   async createMovie(data: {
@@ -40,14 +50,14 @@ export class MovieService {
     return movieRepository.update(movieId, data);
   }
 
-async deleteMovie(movieId: string) {
-  // usuń relacje
-  await movieRepository.removeAllActors(movieId);
-  await movieRepository.removeAllGenres(movieId);
+  async deleteMovie(movieId: string) {
+    // usuń relacje
+    await movieRepository.removeAllActors(movieId);
+    await movieRepository.removeAllGenres(movieId);
 
-  // usuń film
-  return movieRepository.delete(movieId);
-}
+    // usuń film
+    return movieRepository.delete(movieId);
+  }
 
   async addActorToMovie(movieId: string, actorId: string) {
     const exists = await movieRepository.hasActor(movieId, actorId);
@@ -58,8 +68,6 @@ async deleteMovie(movieId: string) {
     return movieRepository.addActor(movieId, actorId);
   }
 
-
-  
   async removeActorFromMovie(movieId: string, actorId: string) {
     return movieRepository.removeActor(movieId, actorId);
   }

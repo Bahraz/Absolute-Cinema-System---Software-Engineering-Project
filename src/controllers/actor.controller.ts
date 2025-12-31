@@ -1,53 +1,63 @@
-import { Request, Response } from "express";
-import { actorRepository } from "@repositories/actor.repository";
+import { Request, Response, NextFunction } from "express";
+import { actorService } from "@services/actor.service";
+import { HttpError } from "@utils/httpError";
 
 class ActorsController {
-  /* ================= VIEW ================= */
-  async panel(req: Request, res: Response) {
-    const actors = await actorRepository.findAll();
-    res.render("admin/actors", { actors });
-  }
-
-  /* ================= API ================= */
-  async getAll(req: Request, res: Response) {
-    const actors = await actorRepository.findAll();
-    res.json(actors);
-  }
-
-  async create(req: Request, res: Response) {
-    const { name, surname } = req.body;
-
-    if (!name || !surname) {
-      return res.status(400).json({ error: "Brak danych" });
+  async getAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const actors = await actorService.findAll();
+      res.json(actors);
+    } catch (err) {
+      next(err);
     }
-
-    const actor = await actorRepository.create({ name, surname });
-    res.status(201).json(actor);
   }
 
-  async update(req: Request, res: Response) {
-    const { name, surname } = req.body;
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, surname } = req.body;
 
-    const actor = await actorRepository.update(req.params.id, {
-      name,
-      surname,
-    });
+      if (!name || !surname) {
+        throw new HttpError(400, "Brak danych", "MISSING_FIELDS");
+      }
 
-    if (!actor) {
-      return res.status(404).json({ error: "Nie znaleziono aktora" });
+      const actor = await actorService.create({ name, surname });
+      res.status(201).json(actor);
+    } catch (err) {
+      next(err); // 🔑 KLUCZ
     }
-
-    res.json(actor);
   }
 
-  async delete(req: Request, res: Response) {
-    const actor = await actorRepository.delete(req.params.id);
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, surname } = req.body;
 
-    if (!actor) {
-      return res.status(404).json({ error: "Nie znaleziono aktora" });
+      const actor = await actorService.update(req.params.id, {
+        name,
+        surname,
+      });
+
+      if (!actor) {
+        throw new HttpError(404, "Nie znaleziono aktora", "ACTOR_NOT_FOUND");
+      }
+
+      res.json(actor);
+    } catch (err) {
+      next(err);
     }
+  }
 
-    res.status(204).end();
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const actor = await actorService.delete(req.params.id);
+
+      if (!actor) {
+        throw new HttpError(404, "Nie znaleziono aktora", "ACTOR_NOT_FOUND");
+      }
+
+      res.status(204).end();
+    } catch (err) {
+      next(err);
+    }
   }
 }
 
