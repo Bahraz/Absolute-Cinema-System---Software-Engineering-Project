@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["jest", "node"],
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@routes/*": ["src/routes/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@models/*": ["src/models/*"],
+      "@config/*": ["src/config/*"],
+      "@services/*": ["src/services/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@middlewares/*": ["src/middleware/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  },
+  "references": [{ "path": "./tsconfig.build.json" }],
+  "include": ["tests/**/*.ts", "src/types/**/*.d.ts"]
+}

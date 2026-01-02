@@ -1,5 +1,3 @@
-import { Hall } from "@models/hall.model";
-import { Movie } from "@models/movie.model";
 import { Screening } from "@models/screening.model";
 import { Reservation } from "@models/reservation.model";
 
@@ -59,6 +57,7 @@ export class ScreeningRepository {
       }))
     );
   }
+
   count() {
     return Screening.countDocuments();
   }
