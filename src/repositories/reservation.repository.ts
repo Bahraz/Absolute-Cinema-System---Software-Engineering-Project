@@ -1,8 +1,4 @@
 import { Reservation } from "@models/reservation.model";
-import { Ticket } from "@models/ticket.model";
-import { Screening } from "@models/screening.model";
-import { Seat } from "@models/seat.model";
-import { User } from "@models/user.model";
 
 export class ReservationRepository {
   findById(id: string) {
@@ -64,15 +60,18 @@ export class ReservationRepository {
   }) {
     return Reservation.create(data);
   }
+
   update(id: string, data: { screening_id?: string; seats_id?: string }) {
     return Reservation.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     });
   }
+
   delete(id: string) {
     return Reservation.findByIdAndDelete(id);
   }
+
   markInactive(id: string) {
     return Reservation.findByIdAndUpdate(
       id,
@@ -80,6 +79,7 @@ export class ReservationRepository {
       { new: true }
     );
   }
+  
   count() {
     return Reservation.countDocuments();
   }
@@ -89,11 +89,11 @@ export class ReservationRepository {
   }
 
   findByScreening(screeningId: string) {
-  return Reservation.find(
-    { screening_id: screeningId },
-    { seats_id: 1 }
-  );
-}
+    return Reservation.find(
+      { screening_id: screeningId },
+      { seats_id: 1 }
+    );
+  }
 }
 
 export const reservationRepository = new ReservationRepository();

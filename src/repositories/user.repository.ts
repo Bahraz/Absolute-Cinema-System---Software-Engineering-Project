@@ -1,6 +1,5 @@
 import { User } from "@models/user.model";
 import { employeesRepository } from "@repositories/employees.repository";
-import bcrypt from "bcrypt";
 
 export class UserRepository {
   findById(id: string) {
@@ -10,6 +9,7 @@ export class UserRepository {
   findByIdForUpdate(id: string) {
     return User.findById(id); // 🔥 PEŁNY DOCUMENT
   }
+
   async updateUser(
     userId: string,
     data: {
@@ -28,6 +28,7 @@ export class UserRepository {
     await user.save();
     return user;
   }
+
   async updateData(
     id: string,
     data: { name: string; surname: string; email: string }
@@ -79,6 +80,7 @@ export class UserRepository {
   }) {
     return User.create(data);
   }
+
   count() {
     return User.countDocuments();
   }
