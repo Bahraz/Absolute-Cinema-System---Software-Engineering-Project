@@ -4,7 +4,7 @@ export class ActorRepository {
   findAll() {
     return Actor.find();
   }
-  
+
   findById(id: string) {
     return Actor.findById(id);
   }

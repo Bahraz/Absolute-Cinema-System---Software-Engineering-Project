@@ -23,7 +23,7 @@ class ActorsController {
       const actor = await actorService.create({ name, surname });
       res.status(201).json(actor);
     } catch (err) {
-      next(err); // 🔑 KLUCZ
+      next(err);
     }
   }
 

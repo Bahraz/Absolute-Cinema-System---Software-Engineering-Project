@@ -17,11 +17,7 @@ export class SeatController {
       const seat = await seatService.findById(req.params.id);
 
       if (!seat) {
-        throw new HttpError(
-          404,
-          "Nie znaleziono miejsca",
-          "SEAT_NOT_FOUND"
-        );
+        throw new HttpError(404, "Nie znaleziono miejsca", "SEAT_NOT_FOUND");
       }
 
       res.json(seat);

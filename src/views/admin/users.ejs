@@ -74,7 +74,6 @@ include("partials/sidebar") %>
     }, 1200);
   }
 
-  /* ===== UPDATE DATA ===== */
   document.querySelectorAll(".save").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
@@ -100,7 +99,6 @@ include("partials/sidebar") %>
     };
   });
 
-  /* ===== UPDATE PASSWORD ===== */
   document.querySelectorAll(".savePassword").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
@@ -128,7 +126,6 @@ include("partials/sidebar") %>
     };
   });
 
-  /* ===== TOGGLE ACTIVE ===== */
   document.querySelectorAll(".toggle").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");

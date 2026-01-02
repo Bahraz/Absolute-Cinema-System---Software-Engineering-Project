@@ -55,8 +55,6 @@ export class UserController {
     }
   }
 
-  /* ================= USER API ================= */
-
   async getProfile(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await userService.getProfile(req.user.id);
@@ -74,8 +72,6 @@ export class UserController {
       next(err);
     }
   }
-
-  /* ================= UPDATE PROFILE ================= */
 
   async updateProfile(req: Request, res: Response, next: NextFunction) {
     try {

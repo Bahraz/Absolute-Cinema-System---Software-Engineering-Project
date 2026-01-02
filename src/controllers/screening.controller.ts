@@ -30,39 +30,39 @@ export class ScreeningController {
     }
   }
 
-async create(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { movie_id, hall_id, start_at } = req.body;
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { movie_id, hall_id, start_at } = req.body;
 
-    if (!movie_id || !hall_id || !start_at) {
-      throw new HttpError(400, "Brak danych", "MISSING_FIELDS");
+      if (!movie_id || !hall_id || !start_at) {
+        throw new HttpError(400, "Brak danych", "MISSING_FIELDS");
+      }
+
+      const screening = await screeningService.createScreening({
+        movie_id,
+        hall_id,
+        start_at,
+      });
+
+      res.status(201).json(screening);
+    } catch (err) {
+      next(err);
     }
-
-    const screening = await screeningService.createScreening({
-      movie_id,
-      hall_id,
-      start_at, // ⬅️ STRING
-    });
-
-    res.status(201).json(screening);
-  } catch (err) {
-    next(err);
   }
-}
 
-async update(req: Request, res: Response, next: NextFunction) {
-  try {
-    const updated = await screeningService.updateScreening(req.params.id, {
-      movie_id: req.body.movie_id,
-      hall_id: req.body.hall_id,
-      start_at: req.body.start_at, // ⬅️ STRING
-    });
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const updated = await screeningService.updateScreening(req.params.id, {
+        movie_id: req.body.movie_id,
+        hall_id: req.body.hall_id,
+        start_at: req.body.start_at,
+      });
 
-    res.json(updated);
-  } catch (err) {
-    next(err);
+      res.json(updated);
+    } catch (err) {
+      next(err);
+    }
   }
-}
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {

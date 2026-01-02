@@ -17,11 +17,7 @@ export class TicketController {
       const ticket = await ticketService.getById(req.params.id);
 
       if (!ticket) {
-        throw new HttpError(
-          404,
-          "Nie znaleziono biletu",
-          "TICKET_NOT_FOUND"
-        );
+        throw new HttpError(404, "Nie znaleziono biletu", "TICKET_NOT_FOUND");
       }
 
       res.json(ticket);
@@ -32,16 +28,10 @@ export class TicketController {
 
   async findByPayment(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await ticketService.getByPayment(
-        req.params.paymentId
-      );
+      const ticket = await ticketService.getByPayment(req.params.paymentId);
 
       if (!ticket) {
-        throw new HttpError(
-          404,
-          "Nie znaleziono biletu",
-          "TICKET_NOT_FOUND"
-        );
+        throw new HttpError(404, "Nie znaleziono biletu", "TICKET_NOT_FOUND");
       }
 
       res.json(ticket);

@@ -14,7 +14,6 @@ export class PaymentController {
 
   async findOne(req: Request, res: Response, next: NextFunction) {
     try {
-      // ⬇️ serwis już rzuca PAYMENT_NOT_FOUND
       const payment = await paymentService.getById(req.params.id);
       res.json(payment);
     } catch (err) {
@@ -26,7 +25,6 @@ export class PaymentController {
     try {
       const { provider } = req.body;
 
-      // ⬇️ lekka walidacja requestu (OK)
       if (!provider) {
         throw new HttpError(
           400,
@@ -54,7 +52,6 @@ export class PaymentController {
         );
       }
 
-      // 🔥 CAŁA logika + walidacja + ticket sync jest w serwisie
       const payment = await paymentService.changeStatus(
         req.params.id,
         status

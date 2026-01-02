@@ -76,7 +76,6 @@ function showMsg(el, text) {
   }, 1200);
 }
 
-/* ===== ADD ===== */
 document.getElementById("addEmployee").onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
@@ -100,7 +99,6 @@ document.getElementById("addEmployee").onsubmit = async e => {
   location.reload();
 };
 
-/* ===== UPDATE ===== */
 document.querySelectorAll(".save").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");
@@ -123,7 +121,6 @@ document.querySelectorAll(".save").forEach(btn => {
   };
 });
 
-/* ===== DELETE ===== */
 document.querySelectorAll(".delete").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");

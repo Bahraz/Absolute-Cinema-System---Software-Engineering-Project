@@ -1,5 +1,5 @@
-<%- include("partials/header", { title: "Filmy" }) %>
-<%- include("partials/sidebar") %>
+<%- include("partials/header", { title: "Filmy" }) %> <%-
+include("partials/sidebar") %>
 
 <h1>Filmy</h1>
 
@@ -9,19 +9,16 @@
 
 <ul id="moviesList">
   <% if (movies.length === 0) { %>
-    <li>Brak filmów</li>
-  <% } %>
-
-  <% movies.forEach(m => { %>
-    <li data-id="<%= m._id %>">
-      <b><%= m.title %></b>
-      (<%= m.release_year %>, <%= m.duration %> min)
-      —
-      <a href="/admin/movies/<%= m._id %>">Szczegóły</a>
-      |
-      <button class="delete danger">Usuń</button>
-      <span class="msg"></span>
-    </li>
+  <li>Brak filmów</li>
+  <% } %> <% movies.forEach(m => { %>
+  <li data-id="<%= m._id %>">
+    <b><%= m.title %></b>
+    (<%= m.release_year %>, <%= m.duration %> min) —
+    <a href="/admin/movies/<%= m._id %>">Szczegóły</a>
+    |
+    <button class="delete danger">Usuń</button>
+    <span class="msg"></span>
+  </li>
   <% }) %>
 </ul>
 
@@ -32,7 +29,12 @@
 <form id="addMovie">
   <input name="title" placeholder="Tytuł" required /><br />
   <input name="release_year" type="number" placeholder="Rok" required /><br />
-  <input name="duration" type="number" placeholder="Czas (min)" required /><br />
+  <input
+    name="duration"
+    type="number"
+    placeholder="Czas (min)"
+    required
+  /><br />
   <textarea name="description" placeholder="Opis" required></textarea><br />
   <button>Dodaj film</button>
 </form>
@@ -49,7 +51,7 @@
     margin-left: 6px;
     font-size: 0.85em;
     opacity: 0;
-    transition: .2s;
+    transition: 0.2s;
   }
   .msg.show {
     opacity: 1;
@@ -58,47 +60,45 @@
 </style>
 
 <script>
-/* ===== DODAWANIE FILMU ===== */
-document.getElementById("addMovie").onsubmit = async e => {
-  e.preventDefault();
-  const f = e.target;
+  document.getElementById("addMovie").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target;
 
-  await fetch("/api/admin/movies", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: f.title.value,
-      release_year: f.release_year.value,
-      duration: f.duration.value,
-      description: f.description.value
-    })
-  });
-
-  location.reload();
-};
-
-/* ===== USUWANIE FILMU ===== */
-document.querySelectorAll(".delete").forEach(btn => {
-  btn.onclick = async e => {
-    const li = e.target.closest("li");
-    const msg = li.querySelector(".msg");
-
-    const res = await fetch(`/api/admin/movies/${li.dataset.id}`, {
-      method: "DELETE"
+    await fetch("/api/admin/movies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: f.title.value,
+        release_year: f.release_year.value,
+        duration: f.duration.value,
+        description: f.description.value,
+      }),
     });
 
-    if (!res.ok) {
-      msg.innerText = "Błąd usuwania";
-      msg.classList.add("show");
-      return;
-    }
-
-    msg.innerText = "Usunięto";
-    msg.classList.add("show");
-
-    setTimeout(() => li.remove(), 400);
+    location.reload();
   };
-});
+
+  document.querySelectorAll(".delete").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+      const msg = li.querySelector(".msg");
+
+      const res = await fetch(`/api/admin/movies/${li.dataset.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        msg.innerText = "Błąd usuwania";
+        msg.classList.add("show");
+        return;
+      }
+
+      msg.innerText = "Usunięto";
+      msg.classList.add("show");
+
+      setTimeout(() => li.remove(), 400);
+    };
+  });
 </script>
 
 <%- include("partials/footer") %>

@@ -4,47 +4,6 @@ import { screeningService } from "@services/screening.service";
 import { HttpError } from "@utils/httpError";
 
 export class ReservationController {
-  /* ========================
-     USER VIEW – PANEL
-  ======================== */
-  async userPanel(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { screenings } = await screeningService.getUserPanelData();
-      res.render("user/reservation", { screenings });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /* ========================
-     USER VIEW – MOJE REZERWACJE
-  ======================== */
-  async myReservationPanel(req: Request, res: Response, next: NextFunction) {
-    try {
-      const reservations = await reservationService.findByUserId(req.user.id);
-      res.render("user/my-reservations", { reservations });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /* ========================
-     ADMIN VIEW
-  ======================== */
-  async panel(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { reservations, screenings } =
-        await reservationService.getPanelData();
-
-      res.render("admin/reservations", { reservations, screenings });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /* ========================
-     USER – API
-  ======================== */
   async getMyReservation(req: Request, res: Response, next: NextFunction) {
     try {
       const reservations = await reservationService.findByUserId(req.user.id);
@@ -54,9 +13,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     ADMIN – API
-  ======================== */
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const reservations = await reservationService.findAll();
@@ -66,9 +22,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     CREATE RESERVATION (USER)
-  ======================== */
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { screening_id, seats_id, payment_provider } = req.body;
@@ -94,9 +47,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     UPDATE RESERVATION
-  ======================== */
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { screening_id, seats_id } = req.body;
@@ -113,9 +63,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     CANCEL RESERVATION
-  ======================== */
   async cancel(req: Request, res: Response, next: NextFunction) {
     try {
       await reservationService.cancelReservation(req.params.id);
@@ -125,9 +72,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     AVAILABLE SEATS
-  ======================== */
   async getAvailableSeats(req: Request, res: Response, next: NextFunction) {
     try {
       const seats = await reservationService.getAvailableSeatsForScreening(
@@ -140,9 +84,6 @@ export class ReservationController {
     }
   }
 
-  /* ========================
-     PRICE CALCULATION
-  ======================== */
   async getPrice(req: Request, res: Response, next: NextFunction) {
     try {
       const price = await reservationService.calculatePrice(

@@ -79,7 +79,7 @@ export class ReservationRepository {
       { new: true }
     );
   }
-  
+
   count() {
     return Reservation.countDocuments();
   }
@@ -89,10 +89,7 @@ export class ReservationRepository {
   }
 
   findByScreening(screeningId: string) {
-    return Reservation.find(
-      { screening_id: screeningId },
-      { seats_id: 1 }
-    );
+    return Reservation.find({ screening_id: screeningId }, { seats_id: 1 });
   }
 }
 

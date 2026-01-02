@@ -39,8 +39,6 @@ include("partials/sidebar") %>
   }
 </script>
 
-<!-- ================= ACTORS ================= -->
-
 <h2>Aktorzy</h2>
 
 <select id="actorSelect">
@@ -63,8 +61,6 @@ include("partials/sidebar") %>
 </ul>
 
 <hr />
-
-<!-- ================= GENRES ================= -->
 
 <h2>Gatunki</h2>
 
@@ -90,7 +86,6 @@ include("partials/sidebar") %>
 <script>
   const movieId = "<%= movie._id %>";
 
-  /* ===== ACTORS ===== */
   document.getElementById("addActor").onclick = async () => {
     const actorId = document.getElementById("actorSelect").value;
     const box = document.getElementById("addActor").parentElement;
@@ -120,7 +115,6 @@ include("partials/sidebar") %>
     };
   });
 
-  /* ===== GENRES ===== */
   document.getElementById("addGenre").onclick = async () => {
     const genreId = document.getElementById("genreSelect").value;
     const box = document.getElementById("addGenre").parentElement;

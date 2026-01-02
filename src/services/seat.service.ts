@@ -55,7 +55,6 @@ export class SeatService {
     if (!deleted) throw new Error("SEAT_NOT_FOUND");
     return true;
   }
-  
 }
 
 export const seatService = new SeatService();

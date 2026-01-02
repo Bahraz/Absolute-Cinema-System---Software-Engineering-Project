@@ -33,7 +33,6 @@ export class AuthService {
       throw new Error("INVALID_CREDENTIALS");
     }
 
-    // 🔎 ADMIN = istnieje w tabeli Employees
     const employee = await employeesRepository.findByUserId(
       user._id.toString()
     );

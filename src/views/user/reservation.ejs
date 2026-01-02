@@ -4,7 +4,6 @@ include("partials/sidebar") %>
 <h1>Nowa rezerwacja</h1>
 
 <form id="reservationForm">
-  <!-- SEANS -->
   <label>Seans</label><br />
   <select id="screening" required>
     <option value="">-- wybierz seans --</option>
@@ -19,7 +18,6 @@ include("partials/sidebar") %>
 
   <br /><br />
 
-  <!-- MIEJSCE -->
   <label>Miejsce</label><br />
   <select id="seat" required>
     <option>Wybierz seans</option>
@@ -27,7 +25,6 @@ include("partials/sidebar") %>
 
   <br /><br />
 
-  <!-- PŁATNOŚĆ -->
   <label>Metoda płatności</label><br />
   <select id="paymentSelect">
     <option value="KARTA">Karta</option>
@@ -73,7 +70,6 @@ include("partials/sidebar") %>
   const seatSelect = document.getElementById("seat");
   const msg = document.querySelector(".msg");
 
-  /* ===== POBIERANIE WOLNYCH MIEJSC ===== */
   screeningSelect.onchange = async () => {
     seatSelect.innerHTML = "<option>Ładowanie...</option>";
 
@@ -96,7 +92,6 @@ include("partials/sidebar") %>
   const priceValue = document.getElementById("priceValue");
 
   screeningSelect.onchange = async () => {
-    /* ===== MIEJSCA ===== */
     seatSelect.innerHTML = "<option>Ładowanie...</option>";
 
     const seatsRes = await fetch(
@@ -112,7 +107,6 @@ include("partials/sidebar") %>
       seatSelect.appendChild(opt);
     });
 
-    /* ===== CENA ===== */
     const priceRes = await fetch(
       `/api/user/reservations/screenings/${screeningSelect.value}/price`
     );
@@ -122,7 +116,6 @@ include("partials/sidebar") %>
     priceBox.style.display = "block";
   };
 
-  /* ===== UTWÓRZ REZERWACJĘ ===== */
   document.getElementById("reservationForm").onsubmit = async (e) => {
     e.preventDefault();
 

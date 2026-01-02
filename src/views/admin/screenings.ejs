@@ -16,7 +16,6 @@
     <% }) %>
   </select>
 
-  <!-- ADMIN USTAWIA GODZINĘ -->
   <input type="datetime-local" name="start_at" required />
 
   <button>Dodaj seans</button>
@@ -30,9 +29,6 @@
        const locked = s.reservationsCount > 0;
   %>
     <li data-id="<%= s._id %>" class="<%= locked ? 'locked' : '' %>">
-
-      <!-- DEBUG (opcjonalnie) -->
-      <!-- <small style="color:#999">DB: <%= s.start_at %></small> -->
 
       <select class="movie" <%= locked ? 'disabled' : '' %>>
         <% movies.forEach(m => { %>
@@ -54,7 +50,6 @@
         <% }) %>
       </select>
 
-      <!-- STRING → STRING, ZERO MAGII -->
       <input
         type="datetime-local"
         class="start_at"
@@ -105,7 +100,6 @@ function showMsg(el, text, error = false) {
   }, 1500);
 }
 
-// CREATE – WYSYŁAMY STRING Z INPUTA
 document.getElementById("addScreening").onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
@@ -116,7 +110,7 @@ document.getElementById("addScreening").onsubmit = async e => {
     body: JSON.stringify({
       movie_id: f.movie_id.value,
       hall_id: f.hall_id.value,
-      start_at: f.start_at.value // ⬅️ STRING
+      start_at: f.start_at.value
     })
   });
 
@@ -131,7 +125,6 @@ document.getElementById("addScreening").onsubmit = async e => {
   setTimeout(() => location.reload(), 500);
 };
 
-// UPDATE – WYSYŁAMY STRING Z INPUTA
 document.querySelectorAll(".save").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");
@@ -142,7 +135,7 @@ document.querySelectorAll(".save").forEach(btn => {
       body: JSON.stringify({
         movie_id: li.querySelector(".movie").value,
         hall_id: li.querySelector(".hall").value,
-        start_at: li.querySelector(".start_at").value // ⬅️ STRING
+        start_at: li.querySelector(".start_at").value 
       })
     });
 
@@ -157,7 +150,6 @@ document.querySelectorAll(".save").forEach(btn => {
   };
 });
 
-// DELETE
 document.querySelectorAll(".delete").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");

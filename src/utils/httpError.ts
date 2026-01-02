@@ -13,7 +13,6 @@ export class HttpError extends Error {
 export const wrapServiceError = (err: any): HttpError => {
   if (err instanceof HttpError) return err;
 
-  // map known service error codes/messages to HttpError
   switch (err.message) {
     case "MISSING_FIELDS":
       return new HttpError(400, "Brak wymaganych pól", "MISSING_FIELDS");

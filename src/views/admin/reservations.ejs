@@ -15,7 +15,6 @@
 
   <div class="reservation-card" data-id="<%= r._id %>">
 
-    <!-- ===== HEADER ===== -->
     <div class="header">
       <div class="movie">
         🎬 <b>
@@ -28,10 +27,8 @@
       </div>
     </div>
 
-    <!-- ===== BODY ===== -->
     <div class="body">
 
-      <!-- USER -->
       <div class="block">
         <h4>Użytkownik</h4>
         <div><b><%= r.user_id.name %> <%= r.user_id.surname %></b></div>
@@ -39,14 +36,12 @@
         <div class="muted">Rezerwacja ID: <%= r._id %></div>
       </div>
 
-      <!-- SEAT -->
       <div class="block">
         <h4>Miejsce</h4>
         Rząd <b><%= r.seats_id.row %></b>,
         miejsce <b><%= r.seats_id.seat_number %></b>
       </div>
 
-      <!-- TICKET -->
       <div class="block">
         <h4>Bilet</h4>
         <% if (r.ticket_id) { %>
@@ -61,7 +56,6 @@
         <% } %>
       </div>
 
-      <!-- PAYMENT -->
       <div class="block">
 <h4>Płatność</h4>
   <% if (r.ticket_id?.payment_id) { 
@@ -84,7 +78,6 @@
       class="paymentStatus"
       data-payment-id="<%= r.ticket_id.payment_id._id %>">
 
-      <!-- aktualny status zawsze widoczny -->
       <option value="<%= currentStatus %>" selected>
         <%= currentStatus %>
       </option>
@@ -105,7 +98,6 @@
 
     </div>
 
-    <!-- ===== FOOTER ===== -->
     <div class="footer">
       <div>
         <label>Zmień seans:</label>
@@ -213,7 +205,6 @@ function showMsg(el, text, error = false) {
   }, 1500);
 }
 
-/* LOAD SEATS */
 document.querySelectorAll(".screeningSelect").forEach(select => {
   select.onchange = async e => {
     const card = e.target.closest(".reservation-card");
@@ -241,7 +232,6 @@ document.querySelectorAll(".screeningSelect").forEach(select => {
   };
 });
 
-/* UPDATE PAYMENT */
 document.querySelectorAll(".savePayment").forEach(btn => {
   btn.onclick = async e => {
     const card = e.target.closest(".reservation-card");
@@ -264,7 +254,6 @@ document.querySelectorAll(".savePayment").forEach(btn => {
   };
 });
 
-/* UPDATE RESERVATION */
 document.querySelectorAll(".saveReservation").forEach(btn => {
   btn.onclick = async e => {
     const card = e.target.closest(".reservation-card");
@@ -285,7 +274,6 @@ document.querySelectorAll(".saveReservation").forEach(btn => {
   };
 });
 
-/* DELETE */
 document.querySelectorAll(".deleteReservation").forEach(btn => {
   btn.onclick = async e => {
     const card = e.target.closest(".reservation-card");

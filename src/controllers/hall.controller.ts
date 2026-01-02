@@ -17,7 +17,7 @@ export class HallController {
       const hall = await hallService.findById(req.params.id);
 
       if (!hall) {
-        throw new HttpError(404, "Nie znaleziono sali", "HALL_NOT_FOUND");
+        throw new HttpError(404, "Nie znaleziono sali.", "HALL_NOT_FOUND");
       }
 
       res.json(hall);
@@ -33,7 +33,7 @@ export class HallController {
       if (!name) {
         throw new HttpError(
           400,
-          "Nazwa sali jest wymagana",
+          "Nazwa sali jest wymagana.",
           "MISSING_FIELDS"
         );
       }
@@ -53,7 +53,7 @@ export class HallController {
       if (!name) {
         throw new HttpError(
           400,
-          "Nazwa sali nie może być pusta",
+          "Nazwa sali nie może być pusta.",
           "MISSING_FIELDS"
         );
       }
@@ -72,7 +72,7 @@ export class HallController {
       await hallService.delete(id);
 
       res.json({
-        message: "Sala została usunięta",
+        message: "Sala została usunięta.",
       });
     } catch (err) {
       next(err);

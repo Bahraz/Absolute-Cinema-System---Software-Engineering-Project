@@ -35,11 +35,6 @@ export class PaymentService {
 
     return paymentRepository.create(provider);
   }
-
-  /**
-   * 🔥 JEDYNE miejsce zmiany statusu płatności
-   * 🔥 TU synchronizujemy TICKET
-   */
   async changeStatus(paymentId: string, newStatus: PaymentStatus) {
     const payment = await paymentRepository.findById(paymentId);
     if (!payment) {
@@ -55,13 +50,11 @@ export class PaymentService {
       );
     }
 
-    // ✅ UPDATE PAYMENT
     const updatedPayment = await paymentRepository.updateStatus(
       paymentId,
       newStatus
     );
 
-    // 🎟️ SYNC TICKET
     const ticket = await ticketRepository.findByPayment(paymentId);
 
     if (ticket) {

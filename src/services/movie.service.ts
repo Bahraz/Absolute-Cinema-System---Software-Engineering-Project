@@ -51,11 +51,9 @@ export class MovieService {
   }
 
   async deleteMovie(movieId: string) {
-    // usuń relacje
     await movieRepository.removeAllActors(movieId);
     await movieRepository.removeAllGenres(movieId);
 
-    // usuń film
     return movieRepository.delete(movieId);
   }
 

@@ -62,7 +62,6 @@ include("partials/sidebar") %>
     }, 1500);
   }
 
-  /* ===== ADD SEAT ===== */
   document.getElementById("addSeat").onsubmit = async (e) => {
     e.preventDefault();
     const f = e.target;
@@ -88,7 +87,6 @@ include("partials/sidebar") %>
     setTimeout(() => location.reload(), 500);
   };
 
-  /* ===== DELETE SEAT ===== */
   document.querySelectorAll(".delete").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");

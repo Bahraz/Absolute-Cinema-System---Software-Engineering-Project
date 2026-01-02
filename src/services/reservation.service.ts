@@ -26,7 +26,6 @@ export class ReservationService {
     seats_id: string;
     payment_provider: "KARTA" | "BLIK" | "PRZELEW" | "GOTÓWKA";
   }) {
-    // validate input presence
     if (
       !data.user_id ||
       !data.screening_id ||
@@ -39,7 +38,6 @@ export class ReservationService {
         "MISSING_FIELDS"
       );
     }
-    // 🔒 sprawdzenie miejsca
     const existing = await reservationRepository.findByScreeningAndSeat(
       data.screening_id,
       data.seats_id
@@ -53,27 +51,22 @@ export class ReservationService {
     let ticket: any = null;
 
     try {
-      // 🎬 SEANS (potrzebny do ceny)
       const screening = await screeningRepository.findById(data.screening_id);
 
       if (!screening) {
         throw new Error("SCREENING_NOT_FOUND");
       }
 
-      // 💰 LICZENIE CENY
       const price = this.calculateTicketPrice(new Date(screening.start_at));
 
-      // 💳 PAYMENT
       payment = await paymentRepository.create(data.payment_provider);
 
-      // 🎟️ TICKET
       ticket = await ticketRepository.create({
         payment_id: payment._id.toString(),
         amount: price,
         expires_at: new Date(Date.now() + 15 * 60 * 1000),
       });
 
-      // 📌 RESERVATION
       const reservation = await reservationRepository.create({
         user_id: data.user_id,
         screening_id: data.screening_id,
@@ -83,7 +76,6 @@ export class ReservationService {
 
       return reservation;
     } catch (err) {
-      // 🧹 RĘCZNY ROLLBACK
       if (ticket?._id) {
         await ticketRepository.delete(ticket._id.toString());
       }
@@ -97,20 +89,16 @@ export class ReservationService {
   }
 
   private calculateTicketPrice(screeningDate: Date): number {
-    const day = screeningDate.getDay(); // 0 = niedziela, 6 = sobota
+    const day = screeningDate.getDay();
     const hour = screeningDate.getHours();
 
-    // 🟥 WEEKEND
     if (day === 0 || day === 6) {
       return 35;
     }
-
-    // 🟧 GODZINY 18–22
     if (hour >= 18 && hour < 22) {
       return 30;
     }
 
-    // 🟩 STANDARD
     return 25;
   }
 
@@ -120,12 +108,10 @@ export class ReservationService {
 
     const date = new Date(screening.start_at);
     const hour = date.getHours();
-    const day = date.getDay(); // 0 = niedziela, 6 = sobota
+    const day = date.getDay();
 
-    // weekend
     if (day === 0 || day === 6) return 35;
 
-    // 18–22
     if (hour >= 18 && hour < 22) return 30;
 
     return 25;
@@ -158,7 +144,6 @@ export class ReservationService {
       throw new Error("RESERVATION_NOT_FOUND");
     }
 
-    // check collision
     const existing = await reservationRepository.findByScreeningAndSeat(
       screening_id,
       seats_id
@@ -176,33 +161,31 @@ export class ReservationService {
     return updated;
   }
 
-async getAvailableSeatsForScreening(screeningId: string) {
-  const screening = await screeningRepository.findById(screeningId);
-  if (!screening) {
-    throw new Error("SCREENING_NOT_FOUND");
+  async getAvailableSeatsForScreening(screeningId: string) {
+    const screening = await screeningRepository.findById(screeningId);
+    if (!screening) {
+      throw new Error("SCREENING_NOT_FOUND");
+    }
+
+    const hallId =
+      typeof screening.hall_id === "string"
+        ? screening.hall_id
+        : screening.hall_id._id.toString();
+
+    const allSeats = await seatRepository.findByHall(hallId);
+
+    const reservations = await reservationRepository.findByScreening(
+      screeningId
+    );
+
+    const takenSeatIds = reservations.map((r) =>
+      typeof r.seats_id === "string" ? r.seats_id : r.seats_id._id.toString()
+    );
+
+    return allSeats.filter(
+      (seat) => !takenSeatIds.includes(seat._id.toString())
+    );
   }
-
-  const hallId =
-    typeof screening.hall_id === "string"
-      ? screening.hall_id
-      : screening.hall_id._id.toString();
-
-  const allSeats = await seatRepository.findByHall(hallId);
-
-  const reservations = await reservationRepository.findByScreening(
-    screeningId
-  );
-
-  const takenSeatIds = reservations.map(r =>
-    typeof r.seats_id === "string"
-      ? r.seats_id
-      : r.seats_id._id.toString()
-  );
-
-  return allSeats.filter(
-    seat => !takenSeatIds.includes(seat._id.toString())
-  );
-}
 }
 
 export const reservationService = new ReservationService();

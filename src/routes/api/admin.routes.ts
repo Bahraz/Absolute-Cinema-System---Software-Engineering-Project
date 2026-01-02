@@ -18,67 +18,44 @@ import { employeesController } from "@controllers/employees.controller";
 
 const router = Router();
 
-/* ================= GLOBAL MIDDLEWARE ================= */
 router.use(authMiddleware, adminOnly);
 
-/* ================= DASHBOARD ================= */
 router.get("/dashboard", adminController.dashboardStats);
 
-/* ================= ACTORS ================= */
 router.get("/actors/all", actorsController.getAll);
 router.post("/actors", actorsController.create);
 router.patch("/actors/:id", actorsController.update);
 router.delete("/actors/:id", actorsController.delete);
 
-/* ================= GENRES ================= */
 router.get("/genres/all", genreController.show);
 router.post("/genres", genreController.create);
 router.patch("/genres/:id", genreController.update);
 router.delete("/genres/:id", genreController.delete);
 
-/* ================= MOVIES ================= */
 router.get("/movies/all", movieController.show);
 router.get("/movies/:id", movieController.details);
 router.post("/movies", movieController.create);
 router.patch("/movies/:id", movieController.update);
 router.delete("/movies/:id", movieController.delete);
 
-/* ===== MOVIE ↔ ACTORS ===== */
-router.post(
-  "/movies/:movieId/actors/:actorId",
-  movieController.addActor
-);
-router.delete(
-  "/movies/:movieId/actors/:actorId",
-  movieController.removeActor
-);
+router.post("/movies/:movieId/actors/:actorId", movieController.addActor);
+router.delete("/movies/:movieId/actors/:actorId", movieController.removeActor);
 
-/* ===== MOVIE ↔ GENRES ===== */
-router.post(
-  "/movies/:movieId/genres/:genreId",
-  movieController.addGenre
-);
-router.delete(
-  "/movies/:movieId/genres/:genreId",
-  movieController.removeGenre
-);
+router.post("/movies/:movieId/genres/:genreId", movieController.addGenre);
+router.delete("/movies/:movieId/genres/:genreId", movieController.removeGenre);
 
-/* ================= HALLS ================= */
 router.post("/halls", hallController.create);
 router.delete("/halls/:id", hallController.delete);
 
-/* ================= SEATS ================= */
 router.get("/seats/hall/:hallId", seatController.findByHall);
 router.post("/seats", seatController.create);
 router.delete("/seats/:id", seatController.delete);
 
-/* ================= SCREENINGS ================= */
 router.get("/screenings", screeningController.show);
 router.post("/screenings", screeningController.create);
 router.patch("/screenings/:id", screeningController.update);
 router.delete("/screenings/:id", screeningController.delete);
 
-/* ================= RESERVATIONS ================= */
 router.get("/reservations", reservationController.getAll);
 router.patch("/reservations/:id", reservationController.update);
 router.delete("/reservations/:id", reservationController.cancel);
@@ -88,26 +65,17 @@ router.get(
   reservationController.getAvailableSeats
 );
 
-/* ================= PAYMENTS ================= */
 router.patch("/payments/:id/status", paymentController.updateStatus);
 router.delete("/payments/:id", paymentController.delete);
 
-/* ================= TICKETS ================= */
 router.patch("/tickets/:id/activate", ticketController.activate);
 router.patch("/tickets/:id/expire", ticketController.expire);
 router.delete("/tickets/:id", ticketController.delete);
 
-/* ================= USERS ================= */
 router.get("/users", userController.getAll);
 router.patch("/users/:id", userController.update);
-router.patch(
-  "/users/:id/password",
-  adminController.resetUserPassword
-);
-router.patch(
-  "/users/:id/toggle-active",
-  userController.toggleActive
-);
+router.patch("/users/:id/password", adminController.resetUserPassword);
+router.patch("/users/:id/toggle-active", userController.toggleActive);
 
 router.post("/employees", employeesController.create);
 router.patch("/employees/:id", employeesController.update);

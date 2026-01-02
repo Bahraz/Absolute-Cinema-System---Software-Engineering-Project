@@ -19,7 +19,7 @@ export class GenreController {
       const genre = await genreService.findById(id);
 
       if (!genre) {
-        throw new HttpError(404, "Nie znaleziono gatunku", "GENRE_NOT_FOUND");
+        throw new HttpError(404, "Nie znaleziono gatunku.", "GENRE_NOT_FOUND");
       }
 
       res.json(genre);
@@ -35,7 +35,7 @@ export class GenreController {
       if (!name) {
         throw new HttpError(
           400,
-          "Nazwa gatunku jest wymagana",
+          "Nazwa gatunku jest wymagana.",
           "MISSING_FIELDS"
         );
       }
@@ -55,7 +55,7 @@ export class GenreController {
       if (!name) {
         throw new HttpError(
           400,
-          "Nazwa gatunku nie może być pusta",
+          "Nazwa gatunku nie może być pusta.",
           "MISSING_FIELDS"
         );
       }
@@ -74,7 +74,7 @@ export class GenreController {
       await genreService.delete(id);
 
       res.json({
-        message: "Gatunek został usunięty",
+        message: "Gatunek został usunięty.",
       });
     } catch (err) {
       next(err);

@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
 import { employeesService } from "@services/employees.service";
-import { userService } from "@services/user.service";
 import { HttpError } from "@utils/httpError";
 
 export class EmployeesController {
@@ -20,7 +19,7 @@ export class EmployeesController {
       if (!user_id || !role) {
         throw new HttpError(
           400,
-          "user_id oraz rola są wymagane",
+          "ID Użytkownika oraz rola są wymagane.",
           "MISSING_FIELDS"
         );
       }
@@ -36,10 +35,7 @@ export class EmployeesController {
     try {
       const { role } = req.body;
 
-      const updated = await employeesService.updateRole(
-        req.params.id,
-        role
-      );
+      const updated = await employeesService.updateRole(req.params.id, role);
 
       res.json(updated);
     } catch (err) {

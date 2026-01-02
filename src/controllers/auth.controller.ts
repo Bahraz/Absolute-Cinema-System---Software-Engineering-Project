@@ -10,7 +10,7 @@ export class AuthController {
       if (!name || !surname || !email || !password) {
         throw new HttpError(
           400,
-          "name, surname, email i password są wymagane",
+          "Imię, nazwisko, email i hasło są wymagane.",
           "MISSING_FIELDS"
         );
       }
@@ -23,7 +23,7 @@ export class AuthController {
       });
 
       res.status(201).json({
-        message: "Rejestracja zakończona sukcesem",
+        message: "Rejestracja zakończona sukcesem.",
         id: user._id,
         email: user.email,
       });
@@ -37,16 +37,11 @@ export class AuthController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        throw new HttpError(
-          400,
-          "email i password są wymagane",
-          "MISSING_FIELDS"
-        );
+        throw new HttpError(400, "Email i hasło są wymagane", "MISSING_FIELDS");
       }
 
       const user = await authService.login(email, password);
 
-      // 🔐 zapis do sesji
       req.session.user = {
         id: user._id,
         role: user.role,
@@ -54,7 +49,6 @@ export class AuthController {
         name: user.name,
       };
 
-      // 🔀 redirect wg roli
       const redirect =
         user.role === "ADMIN" ? "/admin/dashboard" : "/user/dashboard";
 

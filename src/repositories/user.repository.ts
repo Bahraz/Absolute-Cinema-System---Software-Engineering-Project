@@ -7,7 +7,7 @@ export class UserRepository {
   }
 
   findByIdForUpdate(id: string) {
-    return User.findById(id); // 🔥 PEŁNY DOCUMENT
+    return User.findById(id);
   }
 
   async updateUser(
@@ -48,8 +48,8 @@ export class UserRepository {
     const user = await User.findById(id);
     if (!user) return null;
 
-    user.password = password; // surowe
-    await user.save(); // hash w pre-save
+    user.password = password;
+    await user.save();
 
     return true;
   }
@@ -89,17 +89,12 @@ export class UserRepository {
     return User.findByIdAndDelete(id);
   }
 
-  /* ================= BUSINESS ================= */
-
-  /**
-   * Zwraca użytkowników, którzy NIE są pracownikami
-   */
   async findUsersWithoutEmployee() {
     const employees = await employeesRepository.findAllWithUserNames();
 
     const employeeUserIds = employees
       .map((e) => e.user_id?._id)
-      .filter(Boolean); // zabezpieczenie
+      .filter(Boolean);
 
     return User.find({
       _id: { $nin: employeeUserIds },

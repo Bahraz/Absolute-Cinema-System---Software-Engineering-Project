@@ -71,7 +71,6 @@ include("partials/sidebar") %>
     setTimeout(() => el.classList.remove("show", "error"), 1500);
   };
 
-  /* ===== UPDATE PROFILE ===== */
   document.getElementById("saveProfile").onclick = async () => {
     const nameInput = document.getElementById("name");
     const surnameInput = document.getElementById("surname");
@@ -96,7 +95,6 @@ include("partials/sidebar") %>
     );
   };
 
-  /* ===== UPDATE PASSWORD ===== */
   document.getElementById("savePassword").onclick = async () => {
     const res = await fetch("/api/user/password", {
       method: "PATCH",
