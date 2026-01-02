@@ -4,17 +4,26 @@
 <h1>Rezerwacje</h1>
 
 <div class="reservations">
-  <% reservations.forEach(r => { %>
+<% reservations
+  .filter(r =>
+    r.is_active === true &&
+    r.screening_id &&
+    r.screening_id.movie_id &&
+    r.screening_id.hall_id
+  )
+  .forEach(r => { %>
 
   <div class="reservation-card" data-id="<%= r._id %>">
 
     <!-- ===== HEADER ===== -->
     <div class="header">
       <div class="movie">
-        🎬 <b><%= r.screening_id.movie_id.title %></b>
+        🎬 <b>
+  <%= r.screening_id.movie_id?.title || "❌ brak filmu" %>
+</b>
       </div>
       <div class="details">
-        🏛️ <%= r.screening_id.hall_id.name %> |
+        🏛️  <%= r.screening_id.hall_id?.name || "❌ brak sali" %> |
         🕒 <%= r.screening_id.start_at %>
       </div>
     </div>

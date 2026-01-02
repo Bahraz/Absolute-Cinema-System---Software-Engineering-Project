@@ -5,12 +5,11 @@ import { EmployeeRole } from "@models/employees.model";
 declare global {
   namespace Express {
     interface Request {
-      user: {
+      user?: {
         id: string;
         role: UserRole;
         email: string;
         name: string;
-
         employeeRole?: EmployeeRole | null;
       };
     }
