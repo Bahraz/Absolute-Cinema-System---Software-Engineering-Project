@@ -1,15 +1,24 @@
-</div>
+</div> <script>
+        async function logout() {
+            if (!confirm("Czy na pewno chcesz wylogować się z panelu administracyjnego?")) return;
 
-<script> async function logout() {
-  const res = await fetch("/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
+            try {
+                const res = await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" }
+                });
 
-  if (res.ok) {
-    window.location.href = "/login";
-  }
-}
-</script>
+                if (res.ok) {
+                    window.location.href = "/login";
+                } else {
+                    alert("Wystąpił błąd podczas wylogowywania.");
+                }
+            } catch (err) {
+                console.error("Logout error:", err);
+                alert("Błąd połączenia z serwerem.");
+            }
+        }
+    </script> 
 </body>
 </html>

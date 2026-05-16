@@ -4,6 +4,7 @@ import { screeningRepository } from "@repositories/screening.repository";
 import { ticketRepository } from "@repositories/ticket.repository";
 import { paymentRepository } from "@repositories/payment.repository";
 import { HttpError } from "@utils/httpError";
+import QRCode from "qrcode";
 
 export class ReservationService {
   findByUserId(userId: string) {
@@ -38,6 +39,7 @@ export class ReservationService {
         "MISSING_FIELDS"
       );
     }
+
     const existing = await reservationRepository.findByScreeningAndSeat(
       data.screening_id,
       data.seats_id
@@ -59,14 +61,26 @@ export class ReservationService {
 
       const price = this.calculateTicketPrice(new Date(screening.start_at));
 
+      // 1. Tworzenie płatności
       payment = await paymentRepository.create(data.payment_provider);
 
+      // 2. Generowanie kodu QR (np. na podstawie ID płatności i ID użytkownika)
+      const qrData = JSON.stringify({
+        p: payment._id.toString(),
+        u: data.user_id,
+        s: data.seats_id
+      });
+      const qrCodeBase64 = await QRCode.toDataURL(qrData);
+
+      // 3. Tworzenie biletu z kodem QR
       ticket = await ticketRepository.create({
         payment_id: payment._id.toString(),
         amount: price,
         expires_at: new Date(Date.now() + 15 * 60 * 1000),
+        qr_code: qrCodeBase64,
       });
 
+      // 4. Tworzenie rezerwacji
       const reservation = await reservationRepository.create({
         user_id: data.user_id,
         screening_id: data.screening_id,
@@ -76,6 +90,7 @@ export class ReservationService {
 
       return reservation;
     } catch (err) {
+      // Rollback w przypadku błędu
       if (ticket?._id) {
         await ticketRepository.delete(ticket._id.toString());
       }
@@ -106,15 +121,7 @@ export class ReservationService {
     const screening = await screeningRepository.findById(screeningId);
     if (!screening) throw new Error("SCREENING_NOT_FOUND");
 
-    const date = new Date(screening.start_at);
-    const hour = date.getHours();
-    const day = date.getDay();
-
-    if (day === 0 || day === 6) return 35;
-
-    if (hour >= 18 && hour < 22) return 30;
-
-    return 25;
+    return this.calculateTicketPrice(new Date(screening.start_at));
   }
 
   async cancelReservation(id: string) {

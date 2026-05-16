@@ -1,38 +1,172 @@
-<%- include("partials/header", { title: "Gatunki" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Zarządzanie Gatunkami" }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Gatunki</h1>
+<div class="admin-container">
+  <header class="section-header">
+    <h1>📂 Gatunki Filmowe</h1>
+    <p>Kategoryzuj filmy, aby ułatwić użytkownikom ich wyszukiwanie.</p>
+  </header>
 
-<form id="addGenre">
-  <input name="name" placeholder="Nazwa gatunku" required />
-  <button>Dodaj</button>
-  <span class="msg"></span>
-</form>
+  <section class="admin-card add-genre-card">
+    <div class="card-title">Dodaj nowy gatunek</div>
+    <form id="addGenre" class="inline-form">
+      <div class="input-field">
+        <input name="name" placeholder="Np. Sci-Fi, Dramat, Komedia" required />
+      </div>
+      <button class="btn-primary">Dodaj gatunek</button>
+      <div class="msg"></div>
+    </form>
+  </section>
 
-<hr />
+  <section class="admin-card list-card">
+    <div class="card-title">Zdefiniowane kategorie</div>
+    <ul id="genres" class="item-list">
+      <% if (genres.length === 0) { %>
+        <li class="empty-state">Baza gatunków jest pusta.</li>
+      <% } %>
 
-<ul id="genres">
-  <% genres.forEach(genre => { %>
-  <li data-id="<%= genre._id %>">
-    <input class="name" value="<%= genre.name %>" />
-    <button class="save">Zapisz</button>
-    <button class="delete">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
+      <% genres.forEach(genre => { %>
+      <li class="item-row" data-id="<%= genre._id %>">
+        <div class="item-main">
+          <input class="name" value="<%= genre.name %>" placeholder="Nazwa gatunku" />
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon save" title="Zapisz zmiany">💾</button>
+          <button class="btn-icon delete" title="Usuń gatunek">🗑️</button>
+          <span class="msg"></span>
+        </div>
+      </li>
+      <% }) %>
+    </ul>
+  </section>
+</div>
 
 <style>
+  :root {
+    --accent-red: #e50914;
+    --card-bg: #161616;
+    --input-bg: #222;
+    --border: #333;
+    --text-gray: #888;
+  }
+
+  .admin-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .section-header { margin-bottom: 30px; }
+  .section-header h1 { font-size: 2rem; margin: 0; }
+  .section-header p { color: var(--text-gray); margin-top: 5px; }
+
+  /* KARTY */
+  .admin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .card-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-gray);
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  /* FORMULARZ INLINE */
+  .inline-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    position: relative;
+  }
+
+  .input-field { flex: 1; }
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--input-bg);
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: 0.3s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent-red);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+  }
+
+  /* PRZYCISKI */
+  .btn-primary {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+    padding: 13px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: #ff1a25; transform: translateY(-2px); }
+
+  .btn-icon {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s;
+  }
+
+  .btn-icon:hover { background: #333; }
+  .btn-icon.delete:hover { background: #b71c1c; border-color: #f44336; }
+  .btn-icon.save:hover { background: #1b5e20; border-color: #4caf50; }
+
+  /* LISTA */
+  .item-list { list-style: none; padding: 0; margin: 0; }
+
+  .item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 15px;
+  }
+
+  .item-row:last-child { border-bottom: none; }
+  .item-main { flex: 1; }
+
+  .item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 130px;
+    justify-content: flex-end;
+  }
+
+  /* KOMUNIKATY */
   .msg {
-    margin-left: 10px;
-    color: green;
-    font-size: 0.9em;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #4caf50;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: 0.3s;
   }
-  .msg.show {
-    opacity: 1;
-  }
+  .msg.error { color: #f44336; }
+  .msg.show { opacity: 1; }
+  .empty-state { text-align: center; color: var(--text-gray); padding: 20px; font-style: italic; }
 </style>
 
 <script>
@@ -41,8 +175,8 @@ include("partials/sidebar") %>
     if (!msg) return;
 
     msg.innerText = text;
-    msg.classList.add("show");
     msg.classList.toggle("error", isError);
+    msg.classList.add("show");
 
     setTimeout(() => {
       msg.classList.remove("show", "error");
@@ -50,55 +184,80 @@ include("partials/sidebar") %>
     }, 1800);
   }
 
+  // DODAWANIE
   document.getElementById("addGenre").onsubmit = async (e) => {
     e.preventDefault();
     const f = e.target;
+    const btn = f.querySelector("button");
 
-    const res = await fetch("/api/admin/genres", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: f.name.value }),
-    });
+    btn.disabled = true;
 
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/admin/genres", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: f.name.value }),
+      });
 
-    if (!res.ok) {
-      showMsg(f, data.error || "Błąd");
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        showMsg(f, data.error || "Błąd", true);
+        btn.disabled = false;
+        return;
+      }
+
+      showMsg(f, "Dodano pomyślnie!");
+      f.reset();
+      setTimeout(() => location.reload(), 600);
+    } catch (err) {
+      showMsg(f, "Błąd serwera", true);
+      btn.disabled = false;
     }
-
-    showMsg(f, "Dodano");
-    f.reset();
-
-    setTimeout(() => location.reload(), 600);
   };
 
+  // ZAPISYWANIE (EDYCJA)
   document.querySelectorAll(".save").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
+      const nameVal = li.querySelector(".name").value;
 
-      await fetch(`/api/admin/genres/${li.dataset.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: li.querySelector(".name").value,
-        }),
-      });
+      try {
+        const res = await fetch(`/api/admin/genres/${li.dataset.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: nameVal }),
+        });
 
-      showMsg(li, "Zapisano");
+        if (res.ok) showMsg(li, "✓");
+        else showMsg(li, "!", true);
+      } catch (err) {
+        showMsg(li, "!", true);
+      }
     };
   });
 
+  // USUWANIE
   document.querySelectorAll(".delete").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
+      
+      if (!confirm(`Czy na pewno usunąć gatunek: ${li.querySelector(".name").value}?`)) return;
 
-      await fetch(`/api/admin/genres/${li.dataset.id}`, {
-        method: "DELETE",
-      });
+      try {
+        const res = await fetch(`/api/admin/genres/${li.dataset.id}`, {
+          method: "DELETE",
+        });
 
-      showMsg(li, "Usunięto");
-      setTimeout(() => li.remove(), 600);
+        if (res.ok) {
+          showMsg(li, "Usunięto");
+          li.style.opacity = "0.3";
+          li.style.pointerEvents = "none";
+          setTimeout(() => li.remove(), 600);
+        }
+      } catch (err) {
+        showMsg(li, "Błąd!", true);
+      }
     };
   });
 </script>

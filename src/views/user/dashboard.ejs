@@ -1,43 +1,170 @@
-<%- include("partials/header", { title: "Dashboard" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Dashboard - Seanse" }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Nadchodzące seanse</h1>
+<div class="dashboard-container">
+  <header class="page-header">
+    <h1>🎬 Nadchodzące seanse</h1>
+    <p>Wybierz film i zarezerwuj najlepsze miejsce na sali.</p>
+  </header>
 
-<ul class="screenings">
-  <% screenings.forEach(s => { %>
-  <li class="screening">
-    <% if (s.movie_id && s.hall_id) { %> 🎬 <b><%= s.movie_id.title %></b>
-    <% } else { %> ⚠️ Brak danych filmu <% } %>
+  <div class="screenings-grid">
+    <% screenings.forEach(s => { %>
+      <div class="screening-card">
+        <div class="card-content">
+          <div class="movie-info">
+            <% if (s.movie_id) { %>
+              <h2 class="movie-title"><%= s.movie_id.title %></h2>
+              <span class="duration">⏱️ <%= s.movie_id.duration %> min</span>
+            <% } else { %>
+              <h2 class="movie-title">Brak danych filmu</h2>
+            <% } %>
+          </div>
 
-    <div class="details">
-      🏛️ <%= s.hall_id.name %><br />
-      🕒 <%= new Date(s.start_at).toLocaleString() %>
-    </div>
-  </li>
-  <% }) %>
-</ul>
+          <div class="screening-details">
+            <div class="detail-item">
+              <span class="icon">🏛️</span>
+              <span><%= s.hall_id ? s.hall_id.name : 'Brak sali' %></span>
+            </div>
+            <div class="detail-item">
+              <span class="icon">🕒</span>
+              <span><%= new Date(s.start_at).toLocaleString('pl-PL', { 
+                day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' 
+              }) %></span>
+            </div>
+          </div>
+
+          <a href="/user/reservations/new?screeningId=<%= s._id %>" class="btn-book">
+            Rezerwuj bilet
+          </a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
 
 <style>
-  .screenings {
-    list-style: none;
-    padding: 0;
-    max-width: 700px;
+  :root {
+    --primary-red: #e50914;
+    --dark-bg: #141414;
+    --card-bg: #1f1f1f;
+    --text-main: #ffffff;
+    --text-muted: #b3b3b3;
   }
 
-  .screening {
-    border: 1px solid #ddd;
-    border-radius: 6px;
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+    border-left: 5px solid var(--primary-red);
+    padding-left: 20px;
+  }
+
+  .page-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: var(--text-main);
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  /* GRID SYSTEM */
+  .screenings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+  }
+
+  /* KARTA SEANSU */
+  .screening-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screening-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-color: var(--primary-red);
+  }
+
+  .card-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .movie-title {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: var(--text-main);
+    line-height: 1.2;
+  }
+
+  .duration {
+    font-size: 0.9rem;
+    color: var(--primary-red);
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .screening-details {
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .detail-item .icon {
+    font-size: 1.1rem;
+  }
+
+  /* PRZYCISK */
+  .btn-book {
+    margin-top: auto;
+    background: var(--primary-red);
+    color: white;
+    text-decoration: none;
+    text-align: center;
     padding: 12px;
-    margin-bottom: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background 0.2s;
   }
 
-  .movie {
-    font-size: 1.1em;
+  .btn-book:hover {
+    background: #ff0a16;
   }
 
-  .details {
-    color: #555;
-    margin-top: 4px;
+  /* Responsywność dla urządzeń mobilnych */
+  @media (max-width: 600px) {
+    .screenings-grid {
+      grid-template-columns: 1fr;
+    }
+    .page-header h1 {
+      font-size: 1.8rem;
+    }
   }
 </style>
 

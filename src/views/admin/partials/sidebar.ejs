@@ -1,15 +1,126 @@
 <aside class="sidebar">
-  <h2>🎬 Kino – Admin</h2>
-  <nav>
-    <a href="/admin/dashboard">Dashboard</a>
-    <a href="/admin/actors">Aktorzy</a>
-    <a href="/admin/genres">Gatunki</a>
-    <a href="/admin/movies">Filmy</a>
-    <a href="/admin/halls">Sale</a>
-    <a href="/admin/screenings">Seanse</a>
-    <a href="/admin/reservations">Rezerwacje</a>
-    <a href="/admin/employees">Pracownicy</a>
-    <a href="/admin/users">Użytkownicy</a>
-    <a href="#" onclick="logout(); return false;">Wyloguj</a>
-  </nav>
+    <div class="sidebar-brand">
+        <span class="brand-icon">🛠️</span>
+        <h2>Absolute Cinema</h2>
+    </div>
+
+    <nav class="admin-nav">
+        <p class="nav-label">Analityka</p>
+        <a href="/admin/dashboard"><span>📊</span> Dashboard</a>
+
+        <p class="nav-label">Zasoby</p>
+        <a href="/admin/actors"><span>🎭</span> Aktorzy</a>
+        <a href="/admin/genres"><span>📂</span> Gatunki</a>
+        <a href="/admin/movies"><span>🎬</span> Filmy</a>
+        <a href="/admin/halls"><span>🏛️</span> Sale</a>
+
+        <p class="nav-label">Operacje</p>
+        <a href="/admin/screenings"><span>📅</span> Seanse</a>
+        <a href="/admin/reservations"><span>🎟️</span> Rezerwacje</a>
+
+        <p class="nav-label">Ludzie</p>
+        <a href="/admin/employees"><span>👔</span> Pracownicy</a>
+        <a href="/admin/users"><span>👤</span> Użytkownicy</a>
+
+        <div class="nav-bottom">
+            <a href="#" onclick="logout(); return false;" class="logout-link">
+                <span>🚪</span> Wyloguj panel
+            </a>
+        </div>
+    </nav>
 </aside>
+
+<style>
+    .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        background-color: var(--panel-dark);
+        border-right: 1px solid var(--border);
+        position: fixed;
+        left: 0;
+        top: 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+    }
+
+    .sidebar-brand {
+        padding: 30px 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand h2 {
+        margin: 0;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-main);
+    }
+
+    .admin-nav {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        overflow-y: auto;
+    }
+
+    .nav-label {
+        padding: 15px 25px 5px;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 2px;
+        font-weight: 700;
+    }
+
+    .admin-nav a {
+        padding: 12px 25px;
+        color: var(--text-gray);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+    }
+
+    .admin-nav a:hover {
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-main);
+        border-left-color: var(--accent-red);
+    }
+
+    .admin-nav a span {
+        font-size: 1.1rem;
+        width: 24px;
+        text-align: center;
+    }
+
+    .nav-bottom {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+    }
+
+    .logout-link {
+        color: #ff4d4d !important;
+    }
+
+    .logout-link:hover {
+        background: rgba(255, 77, 77, 0.05) !important;
+        border-left-color: #ff4d4d !important;
+    }
+
+    /* Scrollbar dla sidebara */
+    .admin-nav::-webkit-scrollbar { width: 4px; }
+    .admin-nav::-webkit-scrollbar-track { background: transparent; }
+    .admin-nav::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+</style>
+
+<div class="admin-main">

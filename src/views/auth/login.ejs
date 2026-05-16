@@ -1,38 +1,213 @@
-<%- include('../user/partials/header', { title: 'Logowanie' }) %>
+<%- include('../user/partials/header', { title: 'Zaloguj się do Absolute Cinema' }) %>
 
-<h1>Logowanie</h1>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="cinema-icon">🎬</span>
+            <h1>Witaj ponownie</h1>
+            <p>Zaloguj się, aby zarządzać swoimi rezerwacjami.</p>
+        </div>
 
-<div class="box">
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Hasło">
-  <button onclick="login()">Zaloguj</button>
-  <p id="error" class="error"></p>
+        <div class="auth-form">
+            <div class="input-group">
+                <label for="email">Adres Email</label>
+                <input id="email" type="email" placeholder="email@przyklad.pl" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Hasło</label>
+                <input id="password" type="password" placeholder="Wprowadź hasło" required>
+            </div>
+
+            <button id="loginBtn" class="btn-login">Zaloguj się</button>
+            <p id="error" class="error-msg"></p>
+        </div>
+
+        <div class="auth-footer">
+            <span>Nie masz jeszcze konta?</span>
+            <a href="/register">Zarejestruj się za darmo</a>
+        </div>
+    </div>
 </div>
 
-<p>Nie masz konta? <a href="/register">Zarejestruj się</a></p>
+<style>
+    /* KONTENER GŁÓWNY */
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 150px);
+        padding: 20px;
+    }
+
+    /* KARTA LOGOWANIA */
+    .auth-card {
+        background: #161616;
+        width: 100%;
+        max-width: 420px; /* Nieco węższa niż rejestracja, bo ma mniej pól */
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #262626;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .cinema-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .auth-header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+    }
+
+    .auth-header p {
+        color: #888;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    /* FORMULARZ */
+    .input-group {
+        margin-bottom: 25px;
+    }
+
+    .input-group label {
+        display: block;
+        color: #aaa;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px 16px;
+        background: #2b2b2b;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: 0.3s;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: #e50914;
+        background: #333;
+        box-shadow: 0 0 8px rgba(229, 9, 20, 0.2);
+    }
+
+    /* PRZYCISK */
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #e50914;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-top: 5px;
+    }
+
+    .btn-login:hover {
+        background: #ff0a16;
+        transform: translateY(-2px);
+    }
+
+    /* BŁĘDY */
+    .error-msg {
+        color: #ff4d4d;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 20px;
+        min-height: 1.2rem;
+        font-weight: bold;
+    }
+
+    /* STOPKA */
+    .auth-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #262626;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .auth-footer a {
+        color: #e50914;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
 
 <script>
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const errorEl = document.getElementById("error");
+        const btn = document.getElementById("loginBtn");
 
-  const res = await fetch("/api/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ email, password })
-  });
+        if (!email || !password) {
+            errorEl.innerText = "Wprowadź email i hasło.";
+            return;
+        }
 
-  const data = await res.json();
+        btn.disabled = true;
+        btn.innerText = "Logowanie...";
 
-  if (!res.ok) {
-    document.getElementById("error").innerText = data.error;
-    return;
-  }
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ email, password })
+            });
 
-  window.location.href = data.redirect;
-}
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorEl.innerText = data.error || "Nieprawidłowe dane logowania.";
+                btn.disabled = false;
+                btn.innerText = "Zaloguj się";
+                return;
+            }
+
+            // Sukces - przekierowanie
+            window.location.href = data.redirect;
+        } catch (err) {
+            errorEl.innerText = "Błąd połączenia z serwerem.";
+            btn.disabled = false;
+            btn.innerText = "Zaloguj się";
+        }
+    });
+
+    // Obsługa logowania po kliknięciu klawisza Enter
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById("loginBtn").click();
+        }
+    });
 </script>
 
-</body>
-</html>
+<%- include('../user/partials/footer') %>

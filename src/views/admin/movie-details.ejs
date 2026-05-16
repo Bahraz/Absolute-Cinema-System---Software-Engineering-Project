@@ -1,145 +1,146 @@
-<%- include("partials/header", { title: movie.title }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: movie.title }) %> 
+<%- include("partials/sidebar") %>
 
-<h1><%= movie.title %></h1>
+<div class="admin-container">
+  <header class="section-header detail-header">
+    <div class="header-main">
+      <a href="/admin/movies" class="btn-back">⬅ Powrót</a>
+      <h1><%= movie.title %> <span>(<%= movie.release_year %>)</span></h1>
+    </div>
+    <div class="movie-meta-chips">
+      <span class="chip">⏱ <%= movie.duration %> min</span>
+      <span class="chip">🆔 ID: <%= movie._id %></span>
+    </div>
+  </header>
 
-<p><b>Rok:</b> <%= movie.release_year %></p>
-<p><b>Czas:</b> <%= movie.duration %> min</p>
-<p><%= movie.description %></p>
+  <section class="admin-card movie-desc-card">
+    <div class="card-title">Opis filmu</div>
+    <p><%= movie.description %></p>
+  </section>
 
-<hr />
+  <div class="details-grid">
+    <section class="admin-card">
+      <div class="card-title">Obsada Aktorska</div>
+      <div class="add-relation-form">
+        <select id="actorSelect">
+          <% allActors.forEach(a => { %>
+          <option value="<%= a._id %>"><%= a.name %> <%= a.surname %></option>
+          <% }) %>
+        </select>
+        <button id="addActor" class="btn-add">+</button>
+        <span class="msg" id="actorMsg"></span>
+      </div>
+      <ul class="relation-list">
+        <% actors.forEach(a => { %>
+        <li class="relation-item" data-id="<%= a._id %>">
+          <span><%= a.name %> <%= a.surname %></span>
+          <button class="removeActor btn-remove">×</button>
+        </li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section class="admin-card">
+      <div class="card-title">Gatunki Filmowe</div>
+      <div class="add-relation-form">
+        <select id="genreSelect">
+          <% allGenres.forEach(g => { %>
+          <option value="<%= g._id %>"><%= g.name %></option>
+          <% }) %>
+        </select>
+        <button id="addGenre" class="btn-add">+</button>
+        <span class="msg" id="genreMsg"></span>
+      </div>
+      <ul class="relation-list">
+        <% genres.forEach(g => { %>
+        <li class="relation-item" data-id="<%= g._id %>">
+          <span><%= g.name %></span>
+          <button class="removeGenre btn-remove">×</button>
+        </li>
+        <% }) %>
+      </ul>
+    </section>
+  </div>
+</div>
 
 <style>
-  .msg {
-    margin-left: 10px;
-    color: green;
-    font-size: 0.9em;
-    opacity: 0;
-    transition: opacity 0.2s;
+  .detail-header { border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+  .header-main { display: flex; align-items: center; gap: 20px; margin-bottom: 10px; }
+  .header-main h1 { margin: 0; font-size: 2.5rem; }
+  .header-main h1 span { color: var(--text-muted); font-weight: 300; }
+  
+  .btn-back { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; font-weight: bold; transition: 0.2s; }
+  .btn-back:hover { color: var(--accent-red); }
+
+  .movie-meta-chips { display: flex; gap: 10px; }
+  .chip { background: #333; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; color: #ccc; font-weight: bold; }
+
+  .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+
+  /* FORMY RELACJI */
+  .add-relation-form { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+  select { flex: 1; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; }
+  
+  .btn-add { background: var(--accent-red); color: white; border: none; width: 38px; height: 38px; border-radius: 6px; cursor: pointer; font-size: 1.5rem; }
+
+  /* LISTY */
+  .relation-list { list-style: none; padding: 0; margin: 0; }
+  .relation-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 10px 15px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 8px;
+    border: 1px solid transparent; transition: 0.2s;
   }
-  .msg.show {
-    opacity: 1;
-  }
-  .msg.error {
-    color: red;
-  }
+  .relation-item:hover { border-color: #444; background: rgba(255,255,255,0.05); }
+
+  .btn-remove { background: none; border: none; color: #666; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+  .btn-remove:hover { color: var(--accent-red); transform: scale(1.2); }
+
+  .msg { font-size: 0.7rem; font-weight: bold; }
+  .msg.error { color: #f44336; }
 </style>
 
 <script>
-  function showMsg(el, text, error = false) {
-    const msg = el.querySelector(".msg");
-    msg.innerText = text;
-    msg.classList.add("show");
-    msg.classList.toggle("error", error);
-
-    setTimeout(() => {
-      msg.classList.remove("show", "error");
-      msg.innerText = "";
-    }, 1500);
-  }
-</script>
-
-<h2>Aktorzy</h2>
-
-<select id="actorSelect">
-  <% allActors.forEach(a => { %>
-  <option value="<%= a._id %>"><%= a.name %> <%= a.surname %></option>
-  <% }) %>
-</select>
-
-<button id="addActor">Dodaj aktora</button>
-<span class="msg"></span>
-
-<ul>
-  <% actors.forEach(a => { %>
-  <li data-id="<%= a._id %>">
-    <%= a.name %> <%= a.surname %>
-    <button class="removeActor">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
-
-<hr />
-
-<h2>Gatunki</h2>
-
-<select id="genreSelect">
-  <% allGenres.forEach(g => { %>
-  <option value="<%= g._id %>"><%= g.name %></option>
-  <% }) %>
-</select>
-
-<button id="addGenre">Dodaj gatunek</button>
-<span class="msg"></span>
-
-<ul>
-  <% genres.forEach(g => { %>
-  <li data-id="<%= g._id %>">
-    <%= g.name %>
-    <button class="removeGenre">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
-
-<script>
   const movieId = "<%= movie._id %>";
-
-  document.getElementById("addActor").onclick = async () => {
-    const actorId = document.getElementById("actorSelect").value;
-    const box = document.getElementById("addActor").parentElement;
-
-    const res = await fetch(`/api/admin/movies/${movieId}/actors/${actorId}`, {
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      showMsg(box, data.error || "Błąd", true);
-      return;
-    }
-
-    showMsg(box, "Dodano");
-    setTimeout(() => location.reload(), 500);
+  
+  const showMsg = (el, text, error = false) => {
+    el.innerText = text;
+    el.style.color = error ? "#f44336" : "#4caf50";
+    el.style.opacity = "1";
+    setTimeout(() => el.style.opacity = "0", 2000);
   };
 
-  document.querySelectorAll(".removeActor").forEach((btn) => {
+  // AKTORZY
+  document.getElementById("addActor").onclick = async () => {
+    const actorId = document.getElementById("actorSelect").value;
+    const res = await fetch(`/api/admin/movies/${movieId}/actors/${actorId}`, { method: "POST" });
+    if (!res.ok) return showMsg(document.getElementById("actorMsg"), "Błąd", true);
+    location.reload();
+  };
+
+  document.querySelectorAll(".removeActor").forEach(btn => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
-      await fetch(`/api/admin/movies/${movieId}/actors/${li.dataset.id}`, {
-        method: "DELETE",
-      });
-      showMsg(li, "Usunięto");
+      await fetch(`/api/admin/movies/${movieId}/actors/${li.dataset.id}`, { method: "DELETE" });
+      li.style.transform = "translateX(20px)";
+      li.style.opacity = "0";
       setTimeout(() => li.remove(), 300);
     };
   });
 
+  // GATUNKI
   document.getElementById("addGenre").onclick = async () => {
     const genreId = document.getElementById("genreSelect").value;
-    const box = document.getElementById("addGenre").parentElement;
-
-    const res = await fetch(`/api/admin/movies/${movieId}/genres/${genreId}`, {
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      showMsg(box, data.error || "Błąd", true);
-      return;
-    }
-
-    showMsg(box, "Dodano");
-    setTimeout(() => location.reload(), 500);
+    const res = await fetch(`/api/admin/movies/${movieId}/genres/${genreId}`, { method: "POST" });
+    if (!res.ok) return showMsg(document.getElementById("genreMsg"), "Błąd", true);
+    location.reload();
   };
 
-  document.querySelectorAll(".removeGenre").forEach((btn) => {
+  document.querySelectorAll(".removeGenre").forEach(btn => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
-      await fetch(`/api/admin/movies/${movieId}/genres/${li.dataset.id}`, {
-        method: "DELETE",
-      });
-      showMsg(li, "Usunięto");
+      await fetch(`/api/admin/movies/${movieId}/genres/${li.dataset.id}`, { method: "DELETE" });
+      li.style.transform = "translateX(20px)";
+      li.style.opacity = "0";
       setTimeout(() => li.remove(), 300);
     };
   });

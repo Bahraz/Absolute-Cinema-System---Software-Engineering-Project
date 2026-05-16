@@ -13,6 +13,7 @@
       "@middlewares/*": ["src/middleware/*"],
       "@utils/*": ["src/utils/*"]
     },
+    "types": ["jest", "node"],
     "esModuleInterop": true,
     "skipLibCheck": true
   }

@@ -1,171 +1,279 @@
-<%- include("partials/header", { title: "Seanse" }) %>
+<%- include("partials/header", { title: "Zarządzanie Seansami" }) %>
 <%- include("partials/sidebar") %>
 
-<h1>Seanse</h1>
+<div class="admin-container">
+  <header class="section-header">
+    <h1>📅 Harmonogram Seansów</h1>
+    <p>Planuj wyświetlanie filmów w dostępnych salach kinowych.</p>
+  </header>
 
-<form id="addScreening">
-  <select name="movie_id" required>
-    <% movies.forEach(m => { %>
-      <option value="<%= m._id %>"><%= m.title %></option>
-    <% }) %>
-  </select>
+  <section class="admin-card">
+    <div class="card-title">Dodaj nowy seans</div>
+    <form id="addScreening" class="grid-form">
+      <div class="form-row three-cols">
+        <div class="input-group">
+          <label>Wybierz film</label>
+          <select name="movie_id" required>
+            <option value="" disabled selected>-- Wybierz film --</option>
+            <% movies.forEach(m => { %>
+              <option value="<%= m._id %>"><%= m.title %></option>
+            <% }) %>
+          </select>
+        </div>
 
-  <select name="hall_id" required>
-    <% halls.forEach(h => { %>
-      <option value="<%= h._id %>"><%= h.name %></option>
-    <% }) %>
-  </select>
+        <div class="input-group">
+          <label>Wybierz salę</label>
+          <select name="hall_id" required>
+            <option value="" disabled selected>-- Wybierz salę --</option>
+            <% halls.forEach(h => { %>
+              <option value="<%= h._id %>"><%= h.name %></option>
+            <% }) %>
+          </select>
+        </div>
 
-  <input type="datetime-local" name="start_at" required />
+        <div class="input-group">
+          <label>Data i godzina</label>
+          <input type="datetime-local" name="start_at" required />
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button class="btn-primary">Zaplanuj seans</button>
+        <span class="msg"></span>
+      </div>
+    </form>
+  </section>
 
-  <button>Dodaj seans</button>
-  <span class="msg"></span>
-</form>
+  <section class="admin-card">
+    <div class="card-title">Aktualny repertuar</div>
+    <ul id="screenings" class="screening-list">
+      <% screenings.forEach(s => { 
+           const locked = s.reservationsCount > 0;
+      %>
+        <li data-id="<%= s._id %>" class="screening-row <%= locked ? 'is-locked' : '' %>">
+          
+          <div class="row-content">
+            <div class="input-group">
+              <select class="movie" <%= locked ? 'disabled' : '' %>>
+                <% movies.forEach(m => { %>
+                  <option
+                    value="<%= m._id %>"
+                    <%= s.movie_id && m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
+                    <%= m.title %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
 
-<hr />
+            <div class="input-group">
+              <select class="hall" <%= locked ? 'disabled' : '' %>>
+                <% halls.forEach(h => { %>
+                  <option
+                    value="<%= h._id %>"
+                    <%= s.hall_id && h._id.toString() === s.hall_id._id.toString() ? "selected" : "" %>>
+                    <%= h.name %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
 
-<ul id="screenings">
-  <% screenings.forEach(s => {
-       const locked = s.reservationsCount > 0;
-  %>
-    <li data-id="<%= s._id %>" class="<%= locked ? 'locked' : '' %>">
+            <div class="input-group">
+              <input
+                type="datetime-local"
+                class="start_at"
+                value="<%= s.start_at %>"
+                <%= locked ? 'disabled' : '' %>
+              />
+            </div>
+          </div>
 
-      <select class="movie" <%= locked ? 'disabled' : '' %>>
-        <% movies.forEach(m => { %>
-          <option
-            value="<%= m._id %>"
-            <%= s.movie_id && m._id.toString() === s.movie_id._id.toString() ? "selected" : "" %>>
-            <%= m.title %>
-          </option>
-        <% }) %>
-      </select>
+          <div class="row-actions">
+            <% if (!locked) { %>
+              <button class="btn-icon save" title="Zapisz zmiany">💾</button>
+              <button class="btn-icon delete" title="Usuń seans">🗑️</button>
+            <% } else { %>
+              <button class="btn-icon status-lock" title="Seans posiada rezerwacje - edycja zablokowana">🔒</button>
+            <% } %>
+            <span class="msg"></span>
+          </div>
 
-      <select class="hall" <%= locked ? 'disabled' : '' %>>
-        <% halls.forEach(h => { %>
-          <option
-            value="<%= h._id %>"
-            <%= s.hall_id && h._id.toString() === s.hall_id._id.toString() ? "selected" : "" %>>
-            <%= h.name %>
-          </option>
-        <% }) %>
-      </select>
-
-      <input
-        type="datetime-local"
-        class="start_at"
-        value="<%= s.start_at %>"
-        <%= locked ? 'disabled' : '' %>
-      />
-
-      <% if (!locked) { %>
-        <button class="save">Zapisz</button>
-        <button class="delete">Usuń</button>
-      <% } else { %>
-        🔒 <small>(ma rezerwacje)</small>
-      <% } %>
-
-      <span class="msg"></span>
-    </li>
-  <% }) %>
-</ul>
+        </li>
+      <% }) %>
+    </ul>
+  </section>
+</div>
 
 <style>
-.locked {
-  opacity: 0.6;
-  background: #f5f5f5;
-}
-.locked select,
-.locked input {
-  cursor: not-allowed;
-}
-.msg {
-  margin-left: 10px;
-  opacity: 0;
-  transition: 0.2s;
-  color: green;
-}
-.msg.show { opacity: 1; }
-.msg.error { color: red; }
+  :root {
+    --accent-red: #e50914;
+    --card-bg: #161616;
+    --input-bg: #222;
+    --border: #333;
+    --text-muted: #888;
+  }
+
+  .admin-container { max-width: 1100px; margin: 0 auto; }
+  .section-header { margin-bottom: 30px; }
+  .section-header h1 { font-size: 2rem; margin: 0; }
+  .section-header p { color: var(--text-muted); margin-top: 5px; }
+
+  .admin-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+  .card-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 800; margin-bottom: 20px; }
+
+  /* FORMULARZ */
+  .grid-form { display: flex; flex-direction: column; gap: 20px; }
+  .three-cols { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr; gap: 15px; }
+  .input-group { display: flex; flex-direction: column; }
+  .input-group label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+
+  select, input {
+    padding: 12px; background: var(--input-bg); border: 1px solid #444; border-radius: 6px; color: white; font-size: 0.95rem; width: 100%; transition: 0.2s; box-sizing: border-box;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--accent-red); }
+  select:disabled, input:disabled { opacity: 0.4; cursor: not-allowed; border-color: #222; }
+
+  .form-actions { display: flex; align-items: center; gap: 15px; }
+
+  /* LISTA SEANSÓW */
+  .screening-list { list-style: none; padding: 0; margin: 0; }
+  .screening-row { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 15px 0; border-bottom: 1px solid var(--border); gap: 20px;
+  }
+  .screening-row:last-child { border-bottom: none; }
+  
+  /* Zwiększony gap, by treść nie dotykała akcji */
+  .row-content { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr; gap: 20px; flex: 1; }
+
+  .screening-row.is-locked { opacity: 0.8; }
+
+  /* PRZYCISKI I IKONY STATUSU */
+  .btn-primary { background: var(--accent-red); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+  .btn-primary:hover { background: #ff1a25; transform: translateY(-2px); }
+
+  .btn-icon { 
+    background: #2a2a2a; 
+    border: 1px solid #444; 
+    padding: 8px 12px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+  }
+  .btn-icon:hover { background: #333; }
+  .btn-icon.save:hover { background: #1b5e20; border-color: #4caf50; }
+  .btn-icon.delete:hover { background: #b71c1c; border-color: #f44336; }
+
+  /* Sama kłódka jako ikona statusu */
+  .status-lock { 
+    cursor: help; 
+    background: #1a1a1a; 
+    border-color: #333; 
+    opacity: 0.6;
+  }
+
+  .row-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    min-width: 110px; /* Zmniejszone, by nie spychać daty */
+    justify-content: flex-end; 
+  }
+
+  .msg { font-size: 0.7rem; font-weight: bold; }
+  .msg.show { opacity: 1; }
+  .msg.error { color: #f44336; }
+  .msg.success { color: #4caf50; }
 </style>
 
 <script>
 function showMsg(el, text, error = false) {
   const msg = el.querySelector(".msg");
+  if (!msg) return;
   msg.innerText = text;
-  msg.classList.add("show");
-  msg.classList.toggle("error", error);
+  msg.className = `msg show ${error ? 'error' : 'success'}`;
   setTimeout(() => {
-    msg.classList.remove("show", "error");
+    msg.classList.remove("show", "error", "success");
     msg.innerText = "";
-  }, 1500);
+  }, 2000);
 }
 
 document.getElementById("addScreening").onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
+  const btn = f.querySelector("button");
+  btn.disabled = true;
 
-  const res = await fetch("/api/admin/screenings", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      movie_id: f.movie_id.value,
-      hall_id: f.hall_id.value,
-      start_at: f.start_at.value
-    })
-  });
+  try {
+    const res = await fetch("/api/admin/screenings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        movie_id: f.movie_id.value,
+        hall_id: f.hall_id.value,
+        start_at: f.start_at.value
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      showMsg(f, data.error || "Błąd", true);
+      btn.disabled = false;
+      return;
+    }
 
-  if (!res.ok) {
-    showMsg(f, data.error || "Błąd", true);
-    return;
+    showMsg(f, "Seans dodany!");
+    setTimeout(() => location.reload(), 800);
+  } catch(err) {
+    showMsg(f, "Błąd serwera", true);
+    btn.disabled = false;
   }
-
-  showMsg(f, "Dodano");
-  setTimeout(() => location.reload(), 500);
 };
 
 document.querySelectorAll(".save").forEach(btn => {
   btn.onclick = async e => {
     const li = e.target.closest("li");
+    li.style.opacity = "0.7";
 
-    const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        movie_id: li.querySelector(".movie").value,
-        hall_id: li.querySelector(".hall").value,
-        start_at: li.querySelector(".start_at").value 
-      })
-    });
+    try {
+      const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          movie_id: li.querySelector(".movie").value,
+          hall_id: li.querySelector(".hall").value,
+          start_at: li.querySelector(".start_at").value 
+        })
+      });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      showMsg(li, data.error || "Błąd", true);
-      return;
+      li.style.opacity = "1";
+      if (!res.ok) { showMsg(li, "Błąd!", true); return; }
+      showMsg(li, "Zapisano");
+    } catch(err) {
+      li.style.opacity = "1";
+      showMsg(li, "Błąd!", true);
     }
-
-    showMsg(li, "Zapisano");
   };
 });
 
 document.querySelectorAll(".delete").forEach(btn => {
   btn.onclick = async e => {
+    if(!confirm("Czy na pewno usunąć ten seans?")) return;
     const li = e.target.closest("li");
 
-    const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, {
-      method: "DELETE"
-    });
+    try {
+      const res = await fetch(`/api/admin/screenings/${li.dataset.id}`, { method: "DELETE" });
+      if (!res.ok) { showMsg(li, "Błąd", true); return; }
 
-    if (!res.ok) {
-      const data = await res.json();
-      showMsg(li, data.error || "Błąd", true);
-      return;
-    }
-
-    showMsg(li, "Usunięto");
-    setTimeout(() => li.remove(), 400);
+      showMsg(li, "Usunięto");
+      li.style.transform = "translateX(50px)";
+      li.style.opacity = "0";
+      setTimeout(() => li.remove(), 400);
+    } catch(err) { showMsg(li, "Błąd", true); }
   };
 });
 </script>

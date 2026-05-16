@@ -1,15 +1,23 @@
-</div>
+</div> <script>
+        async function logout() {
+            if (!confirm("Czy na pewno chcesz się wylogować?")) return;
 
-<script> async function logout() {
-  const res = await fetch("/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
+            try {
+                const res = await fetch("/api/auth/logout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                });
 
-  if (res.ok) {
-    window.location.href = "/login";
-  }
-}
-</script>
+                if (res.ok) {
+                    window.location.href = "/login";
+                } else {
+                    alert("Błąd wylogowywania");
+                }
+            } catch (err) {
+                console.error("Logout failed:", err);
+            }
+        }
+    </script>
 </body>
 </html>

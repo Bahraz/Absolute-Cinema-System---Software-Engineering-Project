@@ -1,64 +1,135 @@
-<%- include("partials/header", { title: "Użytkownicy" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Zarządzanie Użytkownikami" }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Użytkownicy</h1>
+<div class="admin-container">
+  <header class="section-header">
+    <h1>👤 Baza Klientów</h1>
+    <p>Przeglądaj profile, modyfikuj dane i zarządzaj dostępem użytkowników do portalu.</p>
+  </header>
 
-<ul class="users">
-  <% users.forEach(u => { %>
-  <li data-id="<%= u._id %>" class="<%= u.is_active ? '' : 'inactive' %>">
-    <input class="name" value="<%= u.name %>" size="10" />
-    <input class="surname" value="<%= u.surname || '' %>" size="10" />
-    <input class="email" value="<%= u.email %>" size="20" />
+  <section class="admin-card">
+    <div class="card-title">Zarejestrowani użytkownicy</div>
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Użytkownik (Dane podstawowe)</th>
+            <th>Zabezpieczenia</th>
+            <th>Status konta</th>
+            <th align="right">Akcje</th>
+          </tr>
+        </thead>
+        <tbody id="usersList">
+          <% users.forEach(u => { %>
+          <tr data-id="<%= u._id %>" class="user-row <%= u.is_active ? '' : 'is-inactive' %>">
+            
+            <td>
+              <div class="user-profile-cell">
+                <div class="avatar-circle"><%= u.name[0] %></div>
+                <div class="inline-inputs">
+                  <input class="name" value="<%= u.name %>" placeholder="Imię" />
+                  <input class="surname" value="<%= u.surname || '' %>" placeholder="Nazwisko" />
+                  <input class="email" value="<%= u.email %>" placeholder="Email" />
+                </div>
+              </div>
+            </td>
 
-    <button class="save">Zapisz</button>
+            <td>
+              <div class="password-cell">
+                <div class="input-with-btn">
+                  <input type="password" class="password" placeholder="Nowe hasło" />
+                  <button class="savePassword btn-action" title="Zmień hasło">🔑</button>
+                </div>
+              </div>
+            </td>
 
-    <input
-      type="password"
-      class="password"
-      placeholder="Nowe hasło"
-      size="10"
-    />
-    <button class="savePassword">Hasło</button>
+            <td>
+              <div class="status-cell">
+                <span class="status-badge">
+                  <%= u.is_active ? "AKTYWNY" : "ZABLOKOWANY" %>
+                </span>
+              </div>
+            </td>
 
-    <button class="toggle">
-      <%= u.is_active ? "Dezaktywuj" : "Aktywuj" %>
-    </button>
+            <td align="right">
+              <div class="row-actions">
+                <button class="save btn-icon primary" title="Zapisz zmiany danych">💾</button>
+                <button class="toggle btn-icon <%= u.is_active ? 'warning' : 'success' %>" title="<%= u.is_active ? 'Zablokuj' : 'Aktywuj' %>">
+                  <%= u.is_active ? "🚫" : "✅" %>
+                </button>
+                <div class="msg"></div>
+              </div>
+            </td>
 
-    <span class="status"> <%= u.is_active ? "AKTYWNY" : "NIEAKTYWNY" %> </span>
-
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
 <style>
-  .users {
-    list-style: none;
-    padding: 0;
-    max-width: 900px;
+  :root {
+    --accent-red: #e50914;
+    --card-bg: #161616;
+    --input-bg: #222;
+    --border: #333;
+    --text-muted: #888;
   }
-  .users li {
-    margin-bottom: 6px;
+
+  .admin-container { max-width: 1250px; margin: 0 auto; }
+  .section-header { margin-bottom: 30px; }
+  .section-header h1 { font-size: 2rem; margin: 0; }
+  .section-header p { color: var(--text-muted); margin-top: 5px; }
+
+  .admin-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; }
+  .card-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 800; margin-bottom: 25px; }
+
+  /* TABELA */
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+  .admin-table td { padding: 15px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+  /* KOMÓRKA PROFILU */
+  .user-profile-cell { display: flex; align-items: center; gap: 15px; }
+  .avatar-circle { width: 40px; height: 40px; background: #333; color: var(--accent-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #444; flex-shrink: 0; }
+  
+  .inline-inputs { display: flex; flex-direction: column; gap: 5px; flex-grow: 1; }
+  .inline-inputs input { 
+    background: transparent; border: none; border-bottom: 1px solid transparent; color: #fff; padding: 2px 5px; font-size: 0.9rem; transition: 0.2s; width: 100%;
   }
-  .users li.inactive {
-    opacity: 0.5;
-  }
-  input,
-  button {
-    margin-left: 4px;
-  }
-  .status {
-    margin-left: 8px;
-    font-size: 0.8em;
-    color: #555;
-  }
-  .msg {
-    margin-left: 6px;
-    opacity: 0;
-    transition: 0.2s;
-  }
-  .msg.show {
-    opacity: 1;
+  .inline-inputs input:focus { outline: none; border-bottom-color: var(--accent-red); background: #1a1a1a; }
+  .inline-inputs .email { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* HASŁO */
+  .input-with-btn { display: flex; gap: 5px; max-width: 160px; }
+  .input-with-btn input { background: var(--input-bg); border: 1px solid #444; border-radius: 4px; padding: 8px; color: #fff; font-size: 0.85rem; width: 100%; }
+  
+  .btn-action { background: #333; border: 1px solid #444; border-radius: 4px; cursor: pointer; padding: 5px 10px; transition: 0.2s; }
+  .btn-action:hover { background: #444; color: #fff; }
+
+  /* STATUS BADGE */
+  .status-badge { font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 20px; background: rgba(76, 175, 80, 0.1); color: #4caf50; border: 1px solid rgba(76, 175, 80, 0.2); }
+  .user-row.is-inactive .status-badge { background: rgba(244, 67, 54, 0.1); color: #f44336; border-color: rgba(244, 67, 54, 0.2); }
+  .user-row.is-inactive { background: rgba(0,0,0,0.2); }
+  .user-row.is-inactive .avatar-circle { filter: grayscale(1); opacity: 0.5; }
+
+  /* AKCJE */
+  .row-actions { display: flex; align-items: center; gap: 8px; justify-content: flex-end; position: relative; }
+  .btn-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid #444; background: #2a2a2a; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+  
+  .btn-icon.primary:hover { background: #1b5e20; border-color: #4caf50; }
+  .btn-icon.warning:hover { background: #e65100; border-color: #ff9800; }
+  .btn-icon.success:hover { background: #1b5e20; border-color: #4caf50; }
+
+  .msg { font-size: 0.7rem; font-weight: bold; position: absolute; bottom: -15px; right: 0; white-space: nowrap; opacity: 0; transition: 0.3s; }
+  .msg.show { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .admin-table thead { display: none; }
+    .admin-table td { display: block; width: 100%; text-align: left !important; border: none; padding: 10px 0; }
+    .row-actions { justify-content: flex-start; margin-top: 10px; border-bottom: 1px solid #333; padding-bottom: 20px; }
   }
 </style>
 
@@ -66,18 +137,21 @@ include("partials/sidebar") %>
   function showMsg(li, text, error = false) {
     const msg = li.querySelector(".msg");
     msg.innerText = text;
-    msg.style.color = error ? "red" : "green";
+    msg.style.color = error ? "#f44336" : "#4caf50";
     msg.classList.add("show");
     setTimeout(() => {
       msg.classList.remove("show");
       msg.innerText = "";
-    }, 1200);
+    }, 2000);
   }
 
+  // ZAPIS DANYCH OSOBOWYCH
   document.querySelectorAll(".save").forEach((btn) => {
     btn.onclick = async (e) => {
-      const li = e.target.closest("li");
-
+      const li = e.target.closest("tr");
+      const btnEl = e.target;
+      
+      btnEl.innerText = "⏳";
       const res = await fetch(`/api/admin/users/${li.dataset.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -88,67 +162,65 @@ include("partials/sidebar") %>
         }),
       });
 
-      const data = await res.json();
-
+      btnEl.innerText = "💾";
       if (!res.ok) {
+        const data = await res.json();
         showMsg(li, data.error || "Błąd", true);
         return;
       }
-
-      showMsg(li, "Zapisano dane");
+      showMsg(li, "Zaktualizowano dane");
     };
   });
 
+  // ZMIANA HASŁA
   document.querySelectorAll(".savePassword").forEach((btn) => {
     btn.onclick = async (e) => {
-      const li = e.target.closest("li");
-      const password = li.querySelector(".password").value;
+      const li = e.target.closest("tr");
+      const passInput = li.querySelector(".password");
 
-      if (!password) {
-        showMsg(li, "Brak hasła", true);
+      if (!passInput.value) {
+        showMsg(li, "Wpisz hasło!", true);
         return;
       }
 
       const res = await fetch(`/api/admin/users/${li.dataset.id}/password`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password: passInput.value }),
       });
 
-      if (!res.ok) {
+      if (res.ok) {
+        passInput.value = "";
+        showMsg(li, "Hasło zmienione");
+      } else {
         const data = await res.json();
         showMsg(li, data.error || "Błąd", true);
-        return;
       }
-
-      li.querySelector(".password").value = "";
-      showMsg(li, "Hasło zmienione");
     };
   });
 
+  // PRZEŁĄCZANIE STATUSU (AKTYWACJA/DEZAKTYWACJA)
   document.querySelectorAll(".toggle").forEach((btn) => {
     btn.onclick = async (e) => {
-      const li = e.target.closest("li");
+      const li = e.target.closest("tr");
+      const btnEl = e.target;
 
-      const res = await fetch(
-        `/api/admin/users/${li.dataset.id}/toggle-active`,
-        { method: "PATCH" }
-      );
-
+      const res = await fetch(`/api/admin/users/${li.dataset.id}/toggle-active`, { method: "PATCH" });
       const data = await res.json();
 
       if (!res.ok) {
-        showMsg(li, data.error || "Błąd", true);
+        showMsg(li, "Błąd statusu", true);
         return;
       }
 
-      li.classList.toggle("inactive");
-      btn.innerText = data.is_active ? "Dezaktywuj" : "Aktywuj";
-      li.querySelector(".status").innerText = data.is_active
-        ? "AKTYWNY"
-        : "NIEAKTYWNY";
+      // Dynamiczna aktualizacja UI bez przeładowania
+      li.classList.toggle("is-inactive", !data.is_active);
+      btnEl.innerText = data.is_active ? "🚫" : "✅";
+      btnEl.title = data.is_active ? "Zablokuj" : "Aktywuj";
+      btnEl.className = `toggle btn-icon ${data.is_active ? 'warning' : 'success'}`;
+      li.querySelector(".status-badge").innerText = data.is_active ? "AKTYWNY" : "ZABLOKOWANY";
 
-      showMsg(li, "Zmieniono status");
+      showMsg(li, data.is_active ? "Konto aktywne" : "Konto zablokowane");
     };
   });
 </script>

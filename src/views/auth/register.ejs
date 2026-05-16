@@ -1,48 +1,233 @@
-<%- include('../partials/header', { title: 'Rejestracja' }) %>
+<%- include('../user/partials/header', { title: 'Dołącz do Absolute Cinema' }) %>
 
-<h1>Rejestracja</h1>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <span class="cinema-icon">🎬</span>
+            <h1>Załóż konto</h1>
+            <p>Zarezerwuj bilet na swój ulubiony seans w kilka sekund.</p>
+        </div>
 
-<div class="box">
-  <input id="name" placeholder="Imię">
-  <input id="surname" placeholder="Nazwisko">
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Hasło">
-  <button onclick="register()">Zarejestruj</button>
-  <p id="error" class="error"></p>
+        <div class="auth-form">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="name">Imię</label>
+                    <input id="name" placeholder="np. Jan" required>
+                </div>
+                <div class="input-group">
+                    <label for="surname">Nazwisko</label>
+                    <input id="surname" placeholder="np. Kowalski" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Adres Email</label>
+                <input id="email" type="email" placeholder="email@przyklad.pl" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Hasło</label>
+                <input id="password" type="password" placeholder="Minimum 6 znaków" required>
+            </div>
+
+            <button id="registerBtn" class="btn-register">Stwórz konto</button>
+            <p id="error" class="error-msg"></p>
+        </div>
+
+        <div class="auth-footer">
+            <span>Masz już konto?</span>
+            <a href="/login">Zaloguj się</a>
+        </div>
+    </div>
 </div>
 
-<p>Masz konto? <a href="/login">Zaloguj się</a></p>
+<style>
+    /* KONTENER GŁÓWNY */
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 150px); /* Odliczamy header */
+        padding: 20px;
+    }
+
+    /* KARTA REJESTRACJI */
+    .auth-card {
+        background: #161616;
+        width: 100%;
+        max-width: 480px;
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #262626;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .cinema-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .auth-header h1 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+    }
+
+    .auth-header p {
+        color: #888;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    /* FORMULARZ */
+    .input-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        color: #aaa;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 12px 16px;
+        background: #2b2b2b;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: 0.3s;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: #e50914;
+        background: #333;
+        box-shadow: 0 0 8px rgba(229, 9, 20, 0.2);
+    }
+
+    /* PRZYCISK */
+    .btn-register {
+        width: 100%;
+        padding: 14px;
+        background: #e50914;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-top: 10px;
+    }
+
+    .btn-register:hover {
+        background: #ff0a16;
+        transform: translateY(-2px);
+    }
+
+    /* BŁĘDY */
+    .error-msg {
+        color: #ff4d4d;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 15px;
+        min-height: 1rem;
+        font-weight: bold;
+    }
+
+    /* STOPKA */
+    .auth-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #262626;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .auth-footer a {
+        color: #e50914;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+        .input-row { grid-template-columns: 1fr; }
+        .auth-card { padding: 25px; }
+    }
+</style>
 
 <script>
-async function register() {
-  const body = {
-    name: document.getElementById("name").value.trim(),
-    surname: document.getElementById("surname").value.trim(),
-    email: document.getElementById("email").value.trim(),
-    password: document.getElementById("password").value
-  };
+    // Używamy addEventListener zamiast onclick w HTML (lepsza praktyka, brak problemów z CSP)
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+        const errorEl = document.getElementById("error");
+        const btn = document.getElementById("registerBtn");
 
-  console.log("WYSYŁAM:", body);
+        const body = {
+            name: document.getElementById("name").value.trim(),
+            surname: document.getElementById("surname").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value
+        };
 
-  const res = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+        if (!body.name || !body.email || !body.password) {
+            errorEl.innerText = "Proszę uzupełnić wymagane pola.";
+            return;
+        }
 
-  const data = await res.json();
+        btn.disabled = true;
+        btn.innerText = "Przetwarzanie...";
 
-  if (!res.ok) {
-    document.getElementById("error").innerText = data.error;
-    return;
-  }
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
 
-  window.location.href = "/login";
-}
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorEl.innerText = data.error || "Wystąpił błąd podczas rejestracji.";
+                btn.disabled = false;
+                btn.innerText = "Stwórz konto";
+                return;
+            }
+
+            // Sukces
+            window.location.href = "/login";
+        } catch (err) {
+            errorEl.innerText = "Błąd połączenia z serwerem.";
+            btn.disabled = false;
+            btn.innerText = "Stwórz konto";
+        }
+    });
 </script>
 
-
-</body>
-</html>
+<%- include('../user/partials/footer') %>

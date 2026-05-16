@@ -1,7 +1,121 @@
 <!DOCTYPE html>
 <html lang="pl">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <title><%= title || "User Panel" %></title>
-  </head>
-</html>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || "Absolute Cinema" %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --topbar-height: 70px;
+            --bg-black: #0a0a0a;
+            --panel-dark: #161616;
+            --accent-red: #e50914;
+            --text-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --border-color: #262626;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-black);
+            color: var(--text-white);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* STYL GÓRNEGO PASKA */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--topbar-height);
+            background-color: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            z-index: 999;
+        }
+
+        .top-bar .page-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-gray);
+            font-weight: 600;
+        }
+
+        /* STYL SIDEBARA */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--panel-dark);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar h2 {
+            padding: 30px 25px;
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--accent-red);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 800;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar nav {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar nav a {
+            padding: 15px 25px;
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar nav a:hover {
+            background-color: rgba(229, 9, 20, 0.05);
+            color: var(--text-white);
+            border-left-color: var(--accent-red);
+        }
+
+        .sidebar nav a.logout-btn {
+            margin-top: auto;
+            color: #ff4d4d;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* KONTENER GŁÓWNY */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 40px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="page-title"><%= title %></div>
+    </header>

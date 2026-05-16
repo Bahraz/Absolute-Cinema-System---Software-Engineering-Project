@@ -1,69 +1,126 @@
-<%- include("partials/header", { title: "Filmy" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Zarządzanie Filmami" }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Filmy</h1>
+<div class="admin-container">
+  <header class="section-header">
+    <h1>🎬 Baza Filmów</h1>
+    <p>Zarządzaj repertuarem, dodawaj nowości i edytuj szczegóły produkcji.</p>
+  </header>
 
-<hr />
+  <section class="admin-card">
+    <div class="card-title">Dodaj nowy film</div>
+    <form id="addMovie" class="grid-form">
+      <div class="form-row">
+        <div class="input-group">
+          <label>Tytuł filmu</label>
+          <input name="title" placeholder="Np. Incepcja" required />
+        </div>
+      </div>
+      <div class="form-row three-cols">
+        <div class="input-group">
+          <label>Rok wydania</label>
+          <input name="release_year" type="number" placeholder="2024" required />
+        </div>
+        <div class="input-group">
+          <label>Czas trwania (min)</label>
+          <input name="duration" type="number" placeholder="120" required />
+        </div>
+        <div class="input-group">
+          <label>&nbsp;</label>
+          <button class="btn-primary">Dodaj film</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="input-group">
+          <label>Opis fabuły</label>
+          <textarea name="description" rows="3" placeholder="Krótki opis filmu..." required></textarea>
+        </div>
+      </div>
+    </form>
+  </section>
 
-<h2>Lista filmów</h2>
-
-<ul id="moviesList">
-  <% if (movies.length === 0) { %>
-  <li>Brak filmów</li>
-  <% } %> <% movies.forEach(m => { %>
-  <li data-id="<%= m._id %>">
-    <b><%= m.title %></b>
-    (<%= m.release_year %>, <%= m.duration %> min) —
-    <a href="/admin/movies/<%= m._id %>">Szczegóły</a>
-    |
-    <button class="delete danger">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
-
-<hr />
-
-<h2>Dodaj film</h2>
-
-<form id="addMovie">
-  <input name="title" placeholder="Tytuł" required /><br />
-  <input name="release_year" type="number" placeholder="Rok" required /><br />
-  <input
-    name="duration"
-    type="number"
-    placeholder="Czas (min)"
-    required
-  /><br />
-  <textarea name="description" placeholder="Opis" required></textarea><br />
-  <button>Dodaj film</button>
-</form>
+  <section class="admin-card">
+    <div class="card-title">Wszystkie filmy w bazie</div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Tytuł</th>
+          <th>Rok</th>
+          <th>Długość</th>
+          <th align="right">Akcje</th>
+        </tr>
+      </thead>
+      <tbody id="moviesList">
+        <% if (movies.length === 0) { %>
+          <tr><td colspan="4" class="empty-state">Brak filmów w bibliotece.</td></tr>
+        <% } %>
+        <% movies.forEach(m => { %>
+        <tr data-id="<%= m._id %>">
+          <td><strong><%= m.title %></strong></td>
+          <td><%= m.release_year %></td>
+          <td><%= m.duration %> min</td>
+          <td align="right" class="table-actions">
+            <a href="/admin/movies/<%= m._id %>" class="btn-icon info" title="Szczegóły">👁️</a>
+            <button class="btn-icon delete" title="Usuń">🗑️</button>
+            <span class="msg"></span>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+</div>
 
 <style>
-  .danger {
-    background: #c0392b;
-    color: #fff;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
+  :root {
+    --accent-red: #e50914;
+    --card-bg: #161616;
+    --input-bg: #222;
+    --border: #333;
+    --text-muted: #888;
   }
-  .msg {
-    margin-left: 6px;
-    font-size: 0.85em;
-    opacity: 0;
-    transition: 0.2s;
+
+  .admin-container { max-width: 1000px; margin: 0 auto; }
+  .section-header { margin-bottom: 30px; }
+  .section-header h1 { font-size: 2rem; margin: 0; }
+  .section-header p { color: var(--text-muted); margin-top: 5px; }
+
+  .admin-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+  .card-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 800; margin-bottom: 20px; }
+
+  /* FORMULARZ */
+  .grid-form { display: flex; flex-direction: column; gap: 15px; }
+  .form-row { display: flex; gap: 15px; }
+  .three-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .input-group { display: flex; flex-direction: column; flex: 1; }
+  .input-group label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+
+  input, textarea {
+    padding: 12px; background: var(--input-bg); border: 1px solid #444; border-radius: 6px; color: white; font-size: 0.95rem; width: 100%; box-sizing: border-box;
   }
-  .msg.show {
-    opacity: 1;
-    color: green;
-  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent-red); }
+
+  /* TABELA */
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 2px solid var(--border); }
+  .admin-table td { padding: 15px 12px; border-bottom: 1px solid var(--border); }
+  .admin-table tr:hover { background: rgba(255,255,255,0.02); }
+
+  .btn-primary { background: var(--accent-red); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+  .btn-primary:hover { background: #ff1a25; transform: translateY(-2px); }
+
+  .btn-icon { background: #2a2a2a; border: 1px solid #444; padding: 8px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; line-height: 1; margin-left: 5px; }
+  .btn-icon.delete:hover { background: #b71c1c; }
+  .btn-icon.info:hover { background: #1e88e5; }
+
+  .msg { font-size: 0.7rem; color: #4caf50; opacity: 0; transition: 0.3s; }
+  .msg.show { opacity: 1; }
 </style>
 
 <script>
   document.getElementById("addMovie").onsubmit = async (e) => {
     e.preventDefault();
     const f = e.target;
-
     await fetch("/api/admin/movies", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -74,29 +131,18 @@ include("partials/sidebar") %>
         description: f.description.value,
       }),
     });
-
     location.reload();
   };
 
   document.querySelectorAll(".delete").forEach((btn) => {
     btn.onclick = async (e) => {
-      const li = e.target.closest("li");
-      const msg = li.querySelector(".msg");
-
-      const res = await fetch(`/api/admin/movies/${li.dataset.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        msg.innerText = "Błąd usuwania";
-        msg.classList.add("show");
-        return;
+      if(!confirm("Czy na pewno usunąć ten film i wszystkie powiązane seanse?")) return;
+      const tr = e.target.closest("tr");
+      const res = await fetch(`/api/admin/movies/${tr.dataset.id}`, { method: "DELETE" });
+      if (res.ok) {
+        tr.style.opacity = "0.3";
+        setTimeout(() => tr.remove(), 400);
       }
-
-      msg.innerText = "Usunięto";
-      msg.classList.add("show");
-
-      setTimeout(() => li.remove(), 400);
     };
   });
 </script>

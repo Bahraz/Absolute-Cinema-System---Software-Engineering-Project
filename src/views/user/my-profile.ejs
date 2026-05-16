@@ -1,115 +1,275 @@
-<%- include("partials/header", { title: "Panel użytkownika" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Mój Profil - Absolute Cinema" }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Mój profil</h1>
+<div class="profile-container">
+  <header class="profile-header">
+    <div class="header-icon">👤</div>
+    <h1>Zarządzanie kontem</h1>
+    <p>Zaktualizuj swoje dane lub zabezpiecz konto nowym hasłem.</p>
+  </header>
 
-<div class="profile">
-  <label>Imię</label><br />
-  <input id="name" value="<%= user.name %>" /><br />
+  <div class="profile-grid">
+    <section class="profile-card">
+      <div class="card-header">
+        <span class="icon">📝</span>
+        <h2>Dane podstawowe</h2>
+      </div>
+      
+      <div class="card-body">
+        <div class="input-group">
+          <label for="name">Imię</label>
+          <input type="text" id="name" value="<%= user.name %>" />
+        </div>
 
-  <label>Nazwisko</label><br />
-  <input id="surname" value="<%= user.surname || "" %>" /><br />
+        <div class="input-group">
+          <label for="surname">Nazwisko</label>
+          <input type="text" id="surname" value="<%= user.surname || '' %>" />
+        </div>
 
-  <label>Email</label><br />
-  <input id="email" value="<%= user.email %>" /><br />
+        <div class="input-group">
+          <label for="email">Adres Email</label>
+          <input type="email" id="email" value="<%= user.email %>" />
+        </div>
 
-  <button id="saveProfile">Zapisz dane</button>
-  <span class="msg" id="profileMsg"></span>
+        <div class="card-actions">
+          <button id="saveProfile" class="btn-cinema">Zapisz zmiany</button>
+          <div id="profileMsg" class="msg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card">
+      <div class="card-header">
+        <span class="icon">🔒</span>
+        <h2>Bezpieczeństwo</h2>
+      </div>
+
+      <div class="card-body">
+        <p class="security-hint">Zalecamy używanie silnego hasła składającego się z liter, cyfr i znaków specjalnych.</p>
+        
+        <div class="input-group">
+          <label for="password">Nowe hasło</label>
+          <input type="password" id="password" placeholder="Minimum 6 znaków" />
+        </div>
+
+        <div class="card-actions">
+          <button id="savePassword" class="btn-cinema">Zaktualizuj hasło</button>
+          <div id="passwordMsg" class="msg"></div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
-
-<hr />
-
-<h2>Zmień hasło</h2>
-
-<div class="password">
-  <input
-    id="password"
-    type="password"
-    placeholder="Nowe hasło (min. 6 znaków)"
-  />
-  <button id="savePassword">Zmień hasło</button>
-  <span class="msg" id="passwordMsg"></span>
-</div>
-
-<hr />
 
 <style>
-  .profile,
-  .password {
-    max-width: 400px;
+  :root {
+    --cinema-red: #e50914;
+    --card-dark: #1f1f1f;
+    --input-bg: #2b2b2b;
+    --text-white: #ffffff;
+    --text-muted: #999;
   }
-  input,
-  button {
-    margin-top: 6px;
+
+  .profile-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
   }
-  .msg {
-    margin-left: 10px;
-    opacity: 0;
-    transition: 0.2s;
+
+  .profile-header {
+    text-align: center;
+    margin-bottom: 50px;
   }
-  .msg.show {
-    opacity: 1;
-    color: green;
-  }
-  .msg.error {
-    color: red;
-  }
-  .reservations {
-    list-style: none;
-    padding: 0;
-  }
-  .reservations li {
+
+  .header-icon {
+    font-size: 3rem;
     margin-bottom: 10px;
+  }
+
+  .profile-header h1 {
+    color: var(--text-white);
+    margin: 0;
+    font-size: 2.2rem;
+  }
+
+  .profile-header p {
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  /* POPRAWIONY GRID */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    align-items: stretch; /* Obie karty będą tej samej wysokości */
+  }
+
+  .profile-card {
+    background: var(--card-dark);
+    border-radius: 15px;
+    padding: 35px;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .card-header h2 {
+    color: var(--text-white);
+    font-size: 1.4rem;
+    margin: 0;
+  }
+
+  .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* STYLIZACJA INPUTÓW */
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-group label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--input-bg);
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: 0.3s;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #55aaff;
+    box-shadow: 0 0 8px rgba(85, 170, 255, 0.3);
+  }
+
+  .security-hint {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 30px;
+  }
+
+  /* PRZYCISKI */
+  .card-actions {
+    margin-top: auto; /* Pcha przycisk na dół karty */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-cinema {
+    background: var(--cinema-red);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .btn-cinema:hover {
+    background: #ff1a25;
+    transform: translateY(-2px);
+  }
+
+  /* KOMUNIKATY */
+  .msg {
+    font-size: 0.85rem;
+    font-weight: bold;
+    min-height: 1.2rem;
+  }
+
+  .msg.success { color: #4caf50; }
+  .msg.error { color: #f44336; }
+
+  @media (max-width: 500px) {
+    .profile-grid { grid-template-columns: 1fr; }
+    .btn-cinema { max-width: 100%; }
   }
 </style>
 
 <script>
-  const showMsg = (el, text, error = false) => {
+  const updateStatus = (id, text, isError = false) => {
+    const el = document.getElementById(id);
     el.innerText = text;
-    el.classList.add("show");
-    el.classList.toggle("error", error);
-    setTimeout(() => el.classList.remove("show", "error"), 1500);
+    el.className = `msg ${isError ? 'error' : 'success'}`;
+    setTimeout(() => el.innerText = "", 3000);
   };
 
+  // ZAPIS PROFILU
   document.getElementById("saveProfile").onclick = async () => {
-    const nameInput = document.getElementById("name");
-    const surnameInput = document.getElementById("surname");
-    const emailInput = document.getElementById("email");
+    const payload = {
+      name: document.getElementById("name").value,
+      surname: document.getElementById("surname").value,
+      email: document.getElementById("email").value
+    };
 
-    const res = await fetch("/api/user/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: nameInput.value,
-        surname: surnameInput.value,
-        email: emailInput.value,
-      }),
-    });
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    const data = await res.json();
-
-    showMsg(
-      document.getElementById("profileMsg"),
-      res.ok ? "Zapisano" : data.error,
-      !res.ok
-    );
+      const data = await res.json();
+      updateStatus("profileMsg", res.ok ? "✅ Dane zapisane!" : data.error, !res.ok);
+    } catch (e) {
+      updateStatus("profileMsg", "❌ Błąd połączenia", true);
+    }
   };
 
+  // ZMIANA HASŁA
   document.getElementById("savePassword").onclick = async () => {
-    const res = await fetch("/api/user/password", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: password.value }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      showMsg(passwordMsg, data.error, true);
+    const passInput = document.getElementById("password");
+    
+    if (passInput.value.length < 6) {
+      updateStatus("passwordMsg", "⚠️ Hasło min. 6 znaków", true);
       return;
     }
 
-    password.value = "";
-    showMsg(passwordMsg, "Hasło zmienione");
+    try {
+      const res = await fetch("/api/user/password", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passInput.value })
+      });
+
+      if (res.ok) {
+        passInput.value = "";
+        updateStatus("passwordMsg", "✅ Hasło zmienione!");
+      } else {
+        const data = await res.json();
+        updateStatus("passwordMsg", data.error, true);
+      }
+    } catch (e) {
+      updateStatus("passwordMsg", "❌ Błąd serwera", true);
+    }
   };
 </script>
 

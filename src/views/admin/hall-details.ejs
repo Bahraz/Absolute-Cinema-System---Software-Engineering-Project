@@ -1,104 +1,203 @@
-<%- include("partials/header", { title: hall.name }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Konfiguracja sali: " + hall.name }) %> 
+<%- include("partials/sidebar") %>
 
-<h1>Sala: <%= hall.name %></h1>
+<div class="admin-container">
+  <header class="section-header detail-header">
+    <a href="/admin/halls" class="btn-back">⬅ Powrót do listy sal</a>
+    <div class="title-wrap">
+      <h1>Sala: <%= hall.name %></h1>
+      <span class="badge">Tryb Projektowania</span>
+    </div>
+  </header>
 
-<hr />
+  <section class="admin-card manage-seats-form">
+    <div class="card-header">
+      <span class="card-icon">➕</span>
+      <h3>Szybkie dodawanie fotela</h3>
+    </div>
+    <form id="addSeat" class="styled-form">
+      <div class="input-grid">
+        <div class="form-group">
+          <label for="row">Rząd</label>
+          <div class="input-wrapper">
+            <span class="input-icon">↕</span>
+            <input type="number" id="row" name="row" placeholder="1" required min="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="seat_number">Numer miejsca</label>
+          <div class="input-wrapper">
+            <span class="input-icon">↔</span>
+            <input type="number" id="seat_number" name="seat_number" placeholder="1" required min="1" />
+          </div>
+        </div>
+        <div class="form-group action-group">
+          <button type="submit" class="btn-add-seat">Dodaj fotel</button>
+        </div>
+      </div>
+      <div class="msg" id="formMsg"></div>
+    </form>
+  </section>
 
-<h2>Miejsca</h2>
+  <section class="admin-card hall-visual-card">
+    <div class="card-header">
+      <span class="card-icon">💺</span>
+      <h3>Podgląd układu miejsc</h3>
+    </div>
+    
+    <div class="cinema-view">
+      <div class="screen-container">
+        <div class="screen-curve"></div>
+        <span class="screen-label">EKRAN</span>
+      </div>
+      
+      <div class="seats-area">
+        <% 
+          const rows = {};
+          seats.forEach(s => {
+            if (!rows[s.row]) rows[s.row] = [];
+            rows[s.row].push(s);
+          });
+          const sortedRows = Object.keys(rows).sort((a, b) => a - b);
+        %>
 
-<form id="addSeat">
-  <input type="number" name="row" placeholder="Rząd" required />
-  <input
-    type="number"
-    name="seat_number"
-    placeholder="Numer miejsca"
-    required
-  />
-  <button>Dodaj miejsce</button>
-  <span class="msg"></span>
-</form>
+        <% sortedRows.forEach(rowNum => { %>
+          <div class="seat-row-wrapper">
+            <div class="row-label side-left">Rząd <%= rowNum %></div>
+            
+            <div class="row-seats-center">
+              <% rows[rowNum].sort((a,b) => a.seat_number - b.seat_number).forEach(seat => { %>
+                <div class="admin-seat">
+                  <span class="s-num"><%= seat.seat_number %></span>
+                  <button class="delete-seat-btn" onclick="deleteSeat('<%= seat._id %>')">×</button>
+                </div>
+              <% }) %>
+            </div>
 
-<hr />
+            <div class="row-label side-right">Rząd <%= rowNum %></div>
+          </div>
+        <% }) %>
 
-<ul id="seats">
-  <% seats.forEach(seat => { %>
-  <li data-id="<%= seat._id %>">
-    Rząd <%= seat.row %>, miejsce <%= seat.seat_number %>
-    <button class="delete">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
+        <% if (seats.length === 0) { %>
+          <div class="empty-hall">Brak miejsc. Dodaj pierwszy fotel powyżej.</div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
 
 <style>
-  .msg {
-    margin-left: 10px;
-    color: green;
-    font-size: 0.9em;
-    opacity: 0;
-    transition: opacity 0.2s;
+  :root {
+    --cinema-red: #e50914;
+    --cinema-blue: #55aaff;
+    --dark-card: #1a1a1a;
+    --input-bg: #262626;
+    --text-muted: #888888;
   }
-  .msg.show {
-    opacity: 1;
+
+  /* --- KLUCZOWA POPRAWKA: UKRYWANIE STRZAŁEK W INPUTACH --- */
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
-  .msg.error {
-    color: red;
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
   }
+
+  .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+  .detail-header { margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+  .btn-back { text-decoration: none; color: var(--text-muted); font-size: 0.9rem; }
+  .title-wrap { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+  .badge { background: var(--cinema-red); font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; font-weight: bold; }
+
+  .admin-card { background: var(--dark-card); border-radius: 12px; border: 1px solid #333; padding: 25px; margin-bottom: 30px; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid #222; padding-bottom: 15px; }
+
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 20px; align-items: flex-end; }
+  .form-group label { display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+  
+  .input-wrapper { position: relative; }
+  .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--cinema-red); font-weight: bold; pointer-events: none; }
+  
+  .styled-form input {
+    width: 100%; padding: 12px 12px 12px 38px; background: var(--input-bg); border: 1px solid #444; border-radius: 8px; color: white; font-size: 1rem; box-sizing: border-box; transition: 0.2s;
+  }
+  .styled-form input:focus { outline: none; border-color: var(--cinema-red); background: #2a2a2a; }
+
+  .btn-add-seat {
+    background: var(--cinema-red); color: white; border: none; padding: 0 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; height: 48px;
+  }
+  .btn-add-seat:hover { background: #ff0a16; transform: translateY(-2px); }
+
+  /* WIZUALIZACJA */
+  .cinema-view { background: #000; border-radius: 12px; padding: 60px 20px; text-align: center; }
+  .screen-container { margin-bottom: 60px; }
+  .screen-curve { width: 60%; height: 5px; background: var(--cinema-blue); margin: 0 auto; border-radius: 50% / 100% 100% 0 0; box-shadow: 0 10px 25px rgba(85, 170, 255, 0.4); }
+  .screen-label { color: var(--cinema-blue); font-size: 0.7rem; letter-spacing: 12px; display: block; margin-top: 15px; }
+
+  /* CENTROWANIE TRZYKOLUMNOWE */
+  .seat-row-wrapper { display: grid; grid-template-columns: 100px 1fr 100px; align-items: center; margin-bottom: 15px; gap: 10px; }
+  .row-label { font-size: 0.75rem; color: #444; font-weight: bold; text-transform: uppercase; }
+  .side-left { text-align: right; }
+  .side-right { text-align: left; }
+  .row-seats-center { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+  .admin-seat {
+    width: 38px; height: 38px; background: #2e7d32; border-radius: 6px 6px 12px 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+    color: white; font-weight: bold; position: relative; border-bottom: 4px solid #1b5e20;
+  }
+  .admin-seat:hover { transform: scale(1.1); background: #388e3c; }
+
+  .delete-seat-btn {
+    position: absolute; top: -10px; right: -10px; width: 22px; height: 22px;
+    background: var(--cinema-red); border: none; border-radius: 50%; color: white;
+    font-size: 14px; cursor: pointer; display: none; line-height: 1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  }
+  .admin-seat:hover .delete-seat-btn { display: block; }
+  .empty-hall { padding: 40px; color: #444; font-style: italic; }
 </style>
 
 <script>
   const hallId = "<%= hall._id %>";
 
-  function showMsg(el, text, error = false) {
-    const msg = el.querySelector(".msg");
-    msg.innerText = text;
-    msg.classList.add("show");
-    msg.classList.toggle("error", error);
-
-    setTimeout(() => {
-      msg.classList.remove("show", "error");
-      msg.innerText = "";
-    }, 1500);
-  }
-
   document.getElementById("addSeat").onsubmit = async (e) => {
     e.preventDefault();
     const f = e.target;
+    const btn = f.querySelector("button");
+    btn.disabled = true;
 
-    const res = await fetch("/api/admin/seats", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        hall_id: hallId,
-        row: f.row.value,
-        seat_number: f.seat_number.value,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showMsg(f, data.error || "Błąd", true);
-      return;
-    }
-
-    showMsg(f, "Dodano");
-    setTimeout(() => location.reload(), 500);
-  };
-
-  document.querySelectorAll(".delete").forEach((btn) => {
-    btn.onclick = async (e) => {
-      const li = e.target.closest("li");
-
-      await fetch(`/api/admin/seats/${li.dataset.id}`, {
-        method: "DELETE",
+    try {
+      const res = await fetch("/api/admin/seats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hall_id: hallId,
+          row: f.row.value,
+          seat_number: f.seat_number.value,
+        }),
       });
 
-      showMsg(li, "Usunięto");
-      setTimeout(() => li.remove(), 300);
-    };
-  });
+      if (res.ok) location.reload();
+      else {
+        const data = await res.json();
+        alert(data.error || "Błąd");
+        btn.disabled = false;
+      }
+    } catch (err) {
+      btn.disabled = false;
+    }
+  };
+
+  async function deleteSeat(id) {
+    if(!confirm("Usunąć ten fotel?")) return;
+    const res = await fetch(`/api/admin/seats/${id}`, { method: "DELETE" });
+    if (res.ok) location.reload();
+  }
 </script>
 
 <%- include("partials/footer") %>

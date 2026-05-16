@@ -1,42 +1,190 @@
-<%- include("partials/header", { title: "Dashboard" }) %> <%-
-include("partials/sidebar") %>
+<%- include("partials/header", { title: "Zarządzanie Aktorami" }) %> 
+<%- include("partials/sidebar") %>
+
+<div class="admin-container">
+  <header class="section-header">
+    <h1>🎭 Baza Aktorów</h1>
+    <p>Dodawaj, edytuj i usuwaj aktorów występujących w filmach.</p>
+  </header>
+
+  <section class="admin-card add-actor-card">
+    <div class="card-title">Dodaj nowego aktora</div>
+    <form id="addActor" class="inline-form">
+      <div class="input-field">
+        <input name="name" placeholder="Imię" required />
+      </div>
+      <div class="input-field">
+        <input name="surname" placeholder="Nazwisko" required />
+      </div>
+      <button class="btn-primary">Dodaj do bazy</button>
+      <span class="msg"></span>
+    </form>
+  </section>
+
+  <section class="admin-card list-card">
+    <div class="card-title">Lista aktorów w systemie</div>
+    <ul id="actors" class="actor-list">
+      <% if (actors.length === 0) { %>
+        <li class="empty-state">Brak aktorów w bazie danych.</li>
+      <% } %>
+
+      <% actors.forEach(actor => { %>
+      <li class="actor-row" data-id="<%= actor._id %>">
+        <div class="actor-inputs">
+          <input class="name" value="<%= actor.name %>" placeholder="Imię" />
+          <input class="surname" value="<%= actor.surname %>" placeholder="Nazwisko" />
+        </div>
+        <div class="actor-actions">
+          <button class="btn-icon save" title="Zapisz">💾</button>
+          <button class="btn-icon delete" title="Usuń">🗑️</button>
+          <span class="msg"></span>
+        </div>
+      </li>
+      <% }) %>
+    </ul>
+  </section>
+</div>
+
 <style>
-  .msg {
-    margin-left: 10px;
-    color: green;
-    font-size: 0.9em;
-    opacity: 0;
-    transition: opacity 0.2s;
+  :root {
+    --accent-red: #e50914;
+    --panel-dark: #1f1f1f;
+    --input-bg: #2b2b2b;
+    --border-color: #333;
+    --text-muted: #888;
   }
 
-  .msg.show {
-    opacity: 1;
+  .admin-container {
+    max-width: 900px;
+    margin: 0 auto;
   }
+
+  .section-header {
+    margin-bottom: 30px;
+  }
+
+  .section-header h1 { margin: 0; font-size: 2rem; }
+  .section-header p { color: var(--text-muted); margin-top: 5px; }
+
+  /* KARTY */
+  .admin-card {
+    background: var(--panel-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+  }
+
+  .card-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  /* FORMULARZ DODAWANIA */
+  .inline-form {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .input-field { flex: 1; }
+
+  input {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--input-bg);
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.95rem;
+    transition: 0.3s;
+    box-sizing: border-box;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--accent-red);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+  }
+
+  /* PRZYCISKI */
+  .btn-primary {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: #ff0a16; transform: translateY(-2px); }
+
+  .btn-icon {
+    background: #333;
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s;
+    line-height: 1;
+  }
+
+  .btn-icon:hover { background: #444; border-color: #555; }
+  .btn-icon.delete:hover { background: #b71c1c; border-color: #d32f2f; }
+  .btn-icon.save:hover { background: #2e7d32; border-color: #388e3c; }
+
+  /* LISTA WIERSZY */
+  .actor-list { list-style: none; padding: 0; margin: 0; }
+
+  .actor-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+    gap: 20px;
+  }
+
+  .actor-row:last-child { border-bottom: none; }
+
+  .actor-inputs {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .actor-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 120px;
+    justify-content: flex-end;
+  }
+
+  /* KOMUNIKATY MSG */
+  .msg {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #4caf50;
+    opacity: 0;
+    transition: 0.3s;
+    white-space: nowrap;
+  }
+
+  .msg.show { opacity: 1; }
+  .empty-state { text-align: center; color: var(--text-muted); padding: 20px; }
 </style>
 
-<h1>Aktorzy</h1>
-
-<form id="addActor">
-  <input name="name" placeholder="Imię" required />
-  <input name="surname" placeholder="Nazwisko" required />
-  <button>Dodaj</button>
-  <span class="msg"></span>
-</form>
-<hr />
-
-<ul id="actors">
-  <% actors.forEach(actor => { %>
-  <li data-id="<%= actor._id %>">
-    <input class="name" value="<%= actor.name %>" />
-    <input class="surname" value="<%= actor.surname %>" />
-    <button class="save">Zapisz</button>
-    <button class="delete">Usuń</button>
-    <span class="msg"></span>
-  </li>
-  <% }) %>
-</ul>
-
 <script>
+  // Funkcja wyświetlająca powiadomienia obok przycisków
   function showMsg(container, text = "Zapisano") {
     const msg = container.querySelector(".msg");
     if (!msg) return;
@@ -46,56 +194,83 @@ include("partials/sidebar") %>
 
     setTimeout(() => {
       msg.classList.remove("show");
-      msg.innerText = "";
-    }, 1800);
+    }, 2000);
   }
 
+  // DODAWANIE AKTORA
   document.getElementById("addActor").onsubmit = async (e) => {
     e.preventDefault();
     const f = e.target;
+    const btn = f.querySelector("button");
 
-    await fetch("/api/admin/actors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: f.name.value,
-        surname: f.surname.value,
-      }),
-    });
+    btn.disabled = true;
 
-    showMsg(f, "Dodano");
-    f.reset();
-
-    setTimeout(() => location.reload(), 800);
-  };
-
-  document.querySelectorAll(".save").forEach((btn) => {
-    btn.onclick = async (e) => {
-      const li = e.target.closest("li");
-
-      await fetch(`/api/admin/actors/${li.dataset.id}`, {
-        method: "PATCH",
+    try {
+      const res = await fetch("/api/admin/actors", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: li.querySelector(".name").value,
-          surname: li.querySelector(".surname").value,
+          name: f.name.value,
+          surname: f.surname.value,
         }),
       });
 
-      showMsg(li, "Zapisano");
+      if (res.ok) {
+        showMsg(f, "Pomyślnie dodano!");
+        f.reset();
+        setTimeout(() => location.reload(), 800);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  // ZAPISYWANIE ZMIAN (Inline)
+  document.querySelectorAll(".save").forEach((btn) => {
+    btn.onclick = async (e) => {
+      const li = e.target.closest("li");
+      const id = li.dataset.id;
+
+      try {
+        await fetch(`/api/admin/actors/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: li.querySelector(".name").value,
+            surname: li.querySelector(".surname").value,
+          }),
+        });
+        showMsg(li, "✓");
+      } catch (err) {
+        showMsg(li, "Błąd!");
+      }
     };
   });
 
+  // USUWANIE AKTORA
   document.querySelectorAll(".delete").forEach((btn) => {
     btn.onclick = async (e) => {
       const li = e.target.closest("li");
+      const id = li.dataset.id;
 
-      await fetch(`/api/admin/actors/${li.dataset.id}`, {
-        method: "DELETE",
-      });
+      if (!confirm("Czy na pewno chcesz usunąć tego aktora?")) return;
 
-      showMsg(li, "Usunięto");
-      setTimeout(() => li.remove(), 600);
+      try {
+        const res = await fetch(`/api/admin/actors/${id}`, {
+          method: "DELETE",
+        });
+
+        if (res.ok) {
+          showMsg(li, "Usunięto");
+          li.style.opacity = "0.3";
+          li.style.pointerEvents = "none";
+          setTimeout(() => li.remove(), 600);
+        }
+      } catch (err) {
+        showMsg(li, "Błąd!");
+      }
     };
   });
 </script>

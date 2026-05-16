@@ -1,7 +1,88 @@
 <!DOCTYPE html>
 <html lang="pl">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <title><%= title || "Admin Panel" %></title>
-  </head>
-</html>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || "Admin Panel" %> | Absolute Cinema</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --topbar-height: 70px;
+            --bg-black: #0a0a0a;
+            --panel-dark: #121212;
+            --accent-red: #e50914;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border: #222222;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-black);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* GÓRNY PASEK */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--topbar-height);
+            background-color: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 999;
+        }
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-badge {
+            background: rgba(229, 9, 20, 0.1);
+            color: var(--accent-red);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .page-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* WRAPPER NA TREŚĆ */
+        .admin-main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--topbar-height);
+            padding: 40px;
+            box-sizing: border-box;
+            min-height: calc(100vh - var(--topbar-height));
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="page-info">
+            <span class="page-badge">Admin Mode</span>
+            <div class="page-title"><%= title %></div>
+        </div>
+        <div class="admin-user">
+            <small style="color: var(--text-muted)">Zalogowany jako:</small>
+            <strong style="margin-left: 5px;">Administrator</strong>
+        </div>
+    </header>
